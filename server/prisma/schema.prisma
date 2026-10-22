@@ -1,0 +1,144 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Student {
+  student_id    Int      @id @default(autoincrement())
+  matric_no     String   @unique @db.VarChar(20)
+  full_name     String   @db.VarChar(100)
+  email         String   @unique @db.VarChar(100)
+  password_hash String   @db.VarChar(255)
+  department    String   @db.VarChar(80)
+  institution   String   @db.VarChar(100)
+  year_of_study String   @db.VarChar(10)
+  status        String   @default("pending_clearance") @db.VarChar(30) // 'pending_clearance', 'cleared', 'rejected'
+  created_at    DateTime @default(now())
+
+  placements    Placement[]
+  activity_logs ActivityLog[]
+  final_reports FinalReport[]
+
+  @@map("students")
+}
+
+model Institution {
+  institution_id Int      @id @default(autoincrement())
+  name           String   @unique @db.VarChar(150)
+  code           String   @unique @db.VarChar(20)
+  state          String?  @db.VarChar(50)
+  created_at     DateTime @default(now())
+
+  @@map("institutions")
+}
+
+model Supervisor {
+  supervisor_id Int    @id @default(autoincrement())
+  full_name     String @db.VarChar(100)
+  email         String @unique @db.VarChar(100)
+  password_hash String @db.VarChar(255)
+  role          String @db.VarChar(20) // 'SCHOOL', 'INDUSTRY', 'COORDINATOR', 'ITF'
+  department    String? @db.VarChar(80)
+  company       String? @db.VarChar(100)
+  institution   String? @db.VarChar(100)
+
+  // Relations
+  school_placements   Placement[]   @relation("SchoolSupervisor")
+  industry_placements Placement[]   @relation("IndustrySupervisor")
+  reviewed_logs       ActivityLog[] @relation("LogReviewer")
+  scheduled_visits    Visit[]       @relation("VisitScheduler")
+  verified_reports    FinalReport[] @relation("ReportVerifier")
+
+  @@map("supervisors")
+}
+
+model Placement {
+  placement_id           Int      @id @default(autoincrement())
+  student_id             Int
+  company_name           String   @db.VarChar(100)
+  address                String   @db.VarChar(255)
+  school_supervisor_id   Int?
+  industry_supervisor_id Int?
+  start_date             DateTime
+  end_date               DateTime
+  created_at             DateTime @default(now())
+
+  student             Student     @relation(fields: [student_id], references: [student_id], onDelete: Restrict)
+  school_supervisor   Supervisor? @relation("SchoolSupervisor", fields: [school_supervisor_id], references: [supervisor_id], onDelete: Restrict)
+  industry_supervisor Supervisor? @relation("IndustrySupervisor", fields: [industry_supervisor_id], references: [supervisor_id], onDelete: Restrict)
+  visits              Visit[]
+
+  @@map("placements")
+}
+
+model ActivityLog {
+  activity_id        Int       @id @default(autoincrement())
+  student_id         Int
+  log_date           DateTime  @db.Date
+  description        String    @db.Text
+  skills_acquired    String?   @db.Text
+  evidence_url       String?   @db.VarChar(500)
+  status             String    @default("pending") @db.VarChar(20) // 'pending', 'approved', 'rejected'
+  industry_endorsed  Boolean   @default(false)
+  supervisor_id      Int?
+  supervisor_comment String?   @db.Text
+  reviewed_at        DateTime?
+  submitted_at       DateTime  @default(now())
+  original_log_id    Int?
+
+  student   Student     @relation(fields: [student_id], references: [student_id], onDelete: Restrict)
+  reviewer  Supervisor? @relation("LogReviewer", fields: [supervisor_id], references: [supervisor_id], onDelete: Restrict)
+  notifications Notification[]
+
+  original_log ActivityLog?  @relation("LogRevision", fields: [original_log_id], references: [activity_id], onDelete: SetNull)
+  revisions    ActivityLog[] @relation("LogRevision")
+
+  @@map("activity_logs")
+}
+
+model Notification {
+  notification_id     Int      @id @default(autoincrement())
+  recipient_type      String   @db.VarChar(20) // 'student' or 'supervisor'
+  recipient_id        Int
+  message             String   @db.Text
+  related_activity_id Int?
+  is_read             Boolean  @default(false)
+  created_at          DateTime @default(now())
+
+  activity_log ActivityLog? @relation(fields: [related_activity_id], references: [activity_id], onDelete: Restrict)
+
+  @@map("notifications")
+}
+
+model Visit {
+  visit_id       Int      @id @default(autoincrement())
+  placement_id   Int
+  scheduled_by   Int
+  scheduled_date DateTime
+  status         String   @default("scheduled") @db.VarChar(20) // 'scheduled', 'completed', 'cancelled'
+  notes          String?  @db.Text
+
+  placement      Placement  @relation(fields: [placement_id], references: [placement_id], onDelete: Restrict)
+  scheduler      Supervisor @relation("VisitScheduler", fields: [scheduled_by], references: [supervisor_id], onDelete: Restrict)
+
+  @@map("visits")
+}
+
+model FinalReport {
+  report_id        Int       @id @default(autoincrement())
+  student_id       Int
+  file_url         String    @db.VarChar(500)
+  submitted_at     DateTime  @default(now())
+  stipend_verified Boolean   @default(false)
+  verified_by      Int?
+  verified_at      DateTime?
+
+  student  Student     @relation(fields: [student_id], references: [student_id], onDelete: Restrict)
+  verifier Supervisor? @relation("ReportVerifier", fields: [verified_by], references: [supervisor_id], onDelete: Restrict)
+
+  @@map("final_reports")
+}

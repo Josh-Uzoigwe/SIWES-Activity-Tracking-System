@@ -1,0 +1,170 @@
+@baseUrl = http://localhost:3000/api/v1
+@contentType = application/json
+
+### 1. Login as Student
+# @name studentLogin
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "student@test.com",
+  "password": "password123",
+  "login_type": "student"
+}
+
+###
+@studentToken = {{studentLogin.response.body.accessToken}}
+
+### 2. Login as School Supervisor
+# @name schoolLogin
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "school@test.com",
+  "password": "password123",
+  "login_type": "supervisor"
+}
+
+###
+@schoolToken = {{schoolLogin.response.body.accessToken}}
+
+### 3. Login as Industry Supervisor
+# @name industryLogin
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "industry@test.com",
+  "password": "password123",
+  "login_type": "supervisor"
+}
+
+###
+@industryToken = {{industryLogin.response.body.accessToken}}
+
+### 4. Login as Coordinator
+# @name coordLogin
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "coordinator@test.com",
+  "password": "password123",
+  "login_type": "supervisor"
+}
+
+###
+@coordToken = {{coordLogin.response.body.accessToken}}
+
+### 5. Login as ITF Officer
+# @name itfLogin
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "itf@test.com",
+  "password": "password123",
+  "login_type": "supervisor"
+}
+
+###
+@itfToken = {{itfLogin.response.body.accessToken}}
+
+---
+### STUDENT ACTIONS
+---
+
+### View Student Dashboard (Me)
+GET {{baseUrl}}/auth/me
+Authorization: Bearer {{studentToken}}
+
+### View Own Activity Logs
+GET {{baseUrl}}/logs
+Authorization: Bearer {{studentToken}}
+
+### Submit a New Activity Log
+# @name submitLog
+POST {{baseUrl}}/logs
+Authorization: Bearer {{studentToken}}
+Content-Type: {{contentType}}
+
+{
+  "log_date": "2026-10-04",
+  "description": "Implemented API testing using REST Client.",
+  "skills_acquired": "API Testing"
+}
+
+### Check Notifications (Should be empty until a supervisor reviews)
+GET {{baseUrl}}/notifications
+Authorization: Bearer {{studentToken}}
+
+
+---
+### SUPERVISOR ACTIONS
+---
+
+### View Students assigned to School Supervisor
+GET {{baseUrl}}/students
+Authorization: Bearer {{schoolToken}}
+
+### View Logs for Assigned Students
+GET {{baseUrl}}/logs
+Authorization: Bearer {{schoolToken}}
+
+### Approve a Log (Use the ID from the submitLog step above if testing)
+# Replace '1' with actual log ID
+PUT {{baseUrl}}/logs/1/review
+Authorization: Bearer {{schoolToken}}
+Content-Type: {{contentType}}
+
+{
+  "status": "approved",
+  "supervisor_comment": "Great work on the APIs."
+}
+
+### Industry Supervisor Endorse a Log
+PUT {{baseUrl}}/logs/1/endorse
+Authorization: Bearer {{industryToken}}
+Content-Type: {{contentType}}
+
+### Check Supervisor Notifications (Should have one from when student submitted a log)
+GET {{baseUrl}}/notifications
+Authorization: Bearer {{schoolToken}}
+
+
+---
+### ITF / COORDINATOR ACTIONS
+---
+
+### View All Final Reports (ITF)
+GET {{baseUrl}}/reports/final
+Authorization: Bearer {{itfToken}}
+
+---
+### PHASE 10: EXPORT ENDPOINTS
+---
+
+### Export Student Logbook (PDF)
+# Try exporting the student's logbook (Assuming studentId=1 from seed)
+GET {{baseUrl}}/reports/export/logbook/1
+Authorization: Bearer {{studentToken}}
+# The response will be binary PDF data. In VS Code, you can click "Save Response" in the pane.
+
+### Export Institution Report (PDF format - default)
+# The seed script created the institution as "University of Tech"
+GET {{baseUrl}}/reports/export/institution/University%20of%20Tech
+Authorization: Bearer {{coordToken}}
+
+### Export Institution Report (CSV format)
+GET {{baseUrl}}/reports/export/institution/University%20of%20Tech?format=csv
+Authorization: Bearer {{coordToken}}
+
+### Export ITF National Report (PDF format)
+GET {{baseUrl}}/reports/export/itf-national
+Authorization: Bearer {{itfToken}}
+
+### Export ITF National Report (CSV format)
+GET {{baseUrl}}/reports/export/itf-national?format=csv
+Authorization: Bearer {{itfToken}}
+

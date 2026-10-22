@@ -1,0 +1,468 @@
+Chapter ONE
+Introduction
+1.1 Background to the Study
+It is now expected from educated individuals that they not only have theoretical knowledge but also be able to practice it through industry related skills. In order to bridge this gap between education and practice, especially in the case of Nigeria, the Students Industrial Work Experience Scheme (SIWES) 
+was
+ started. This scheme provides students with industrial experience where they learn workplace behavior and technical knowledge.
+Despite the importance of SIWES, many institutions still rely on manual methods in managing and monitoring students participating in the 
+program
+. Students are usually expected to keep daily records of activities in logbooks, while supervisors visit organizations physically for inspection and assessment. Reports are often submitted manually at the end of the 
+program
+. This traditional method has several limitations, especially when students are posted to different locations across the country.
+The manual system of managing SIWES activities is often slow, stressful, and inefficient. Supervisors may find it difficult to monitor a large number of students in different organizations. Students may forget to update their logbooks regularly or may lose important records. There may also be delays in communication between students, institutions, and supervisors. In some cases, students may not receive timely feedback concerning their progress.
+Another challenge of the manual method is poor record management. Physical documents can be misplaced, damaged, or manipulated. Retrieving information from paper files may be difficult and time-consuming. Institutions may also find it hard to generate accurate reports on students’ placements, attendance, activities, and performance. These problems reduce the effectiveness of the SIWES 
+program
+.
+The advancement in information and communication technology has made it possible to solve many administrative and academic challenges through digital systems. Educational institutions now adopt web-based and mobile-based systems to improve efficiency, transparency, and accessibility. Applying technology to SIWES management can significantly improve the process of monitoring and evaluating students during industrial training.
+A Student SIWES Activity Tracking System is a computerized platform designed to help students, supervisors, and administrators manage SIWES activities electronically. The system can allow students to register, update their place of attachment, submit daily or weekly reports, upload documents, and communicate with supervisors online. Supervisors can log in to monitor student progress, review reports, provide comments, and assess performance remotely. Administrators can also manage records and generate reports easily.
+The introduction of such a system will reduce dependence on paper records and improve the speed of information sharing. It will also promote accountability, transparency, and proper documentation. Students will find it easier to keep track of their activities, while supervisors will be able to monitor students more effectively regardless of distance. Institutions will benefit from better data storage and easier access to information.
+Therefore, this project focuses on the design and implementation of a Student SIWES Activity Tracking System that will provide an efficient and reliable means of managing SIWES activities in tertiary institutions.
+1.2 Statement of Problem
+The Students Industrial Work Experience Scheme is an important academic 
+program
+, but its management in many institutions is still faced with several challenges due to the use of manual processes. These problems affect students, supervisors, and the institution as a whole.
+One major problem is the difficulty in monitoring students who are attached to different organizations and locations. Since students may be posted to various states and cities, physical supervision becomes expensive, stressful, and time-consuming. Some students may not be visited regularly during the training period.
+Another problem is delay in submission and review of reports. Students often submit their logbooks and reports at the end of the program, making it difficult for supervisors to identify problems early or provide timely corrections.
+Poor communication is also a challenge. Students may need guidance during their training, but reaching supervisors may not be easy. This can affect productivity and learning outcomes.
+There is also the issue of loss, damage, or falsification of records. Paper logbooks can be misplaced, destroyed, or altered, which reduces the reliability of information presented by students.
+In addition, manual record keeping makes it difficult for institutions to maintain accurate databases of students on SIWES, their places of attachment, supervisors, and performance records. Retrieving information for decision-making or future reference may be difficult.
+These challenges highlight the need for an automated Student SIWES Activity Tracking System to improve supervision, reporting, communication, and data management.
+1.3 Aim and Objectives of the Study
+The main aim of this study is to design and implement a Student SIWES Activity Tracking System.
+The specific objectives of the study are to:
+Design a secure platform for managing and tracking students’ SIWES activities
+Develop a secure digital platform for managing and tracking students’ SIWES activities
+Provide a module for students to key in daily tasks, upload evidence and submit progress reports
+Enable supervisors review, comment on and approve students’ SIWES activities remotely
+Automate the generation and storage of SIWES logs and performance reports, in order to reduce the inefficiencies associated with manual SIWES logbook management
+1.4 Significance of the Study
+This project will be beneficial to students, supervisors, institutions, and researchers.
+Students: The system will make it easier for students to record and submit their SIWES activities regularly. It will also help them receive quick feedback from supervisors.
+Supervisors: Supervisors will be able to monitor students more effectively without depending entirely on physical visits. They can review reports and assess performance online.
+Institutions: Schools will benefit from proper record keeping, easier access to information, and better management of SIWES operations.
+Government and Regulatory Bodies: Agencies responsible for educational standards can use accurate SIWES data for planning and policy development.
+Researchers: The study will serve as useful reference material for future students and researchers in related areas.
+1.5 Scope of the Study
+This study covers the design and implementation of a Student SIWES Activity Tracking System for tertiary institutions. The system will focus on the following functions:
+Student registration and login
+Upload of SIWES details and place of attachment
+Submission of daily or weekly activity reports
+Supervisor monitoring and feedback
+Administrative management of records
+Report generation and documentation
+The study is limited to the management and tracking of SIWES activities and does not cover payroll systems or detailed company operations where students are attached.
+1.6 Limitation
+s
+ of the Study
+During the course of this study, some limitations may be encountered. These include:
+1.
+Limited time available for development and testing.
+2.
+Financial constraints in acquiring resources.
+3.
+Dependence on internet connectivity for online access.
+4.
+Limited access to real institutional data for testing.
+5.
+Possibility of technical issues during implementation.
+6.
+Resistance to change from users who prefer manual methods.
+Despite these limitations, efforts will be made to ensure the successful completion of the project.
+1.7 Definition of Terms
+SIWES
+: Students Industrial Work Experience Scheme established to expose students to practical training.
+Tracking System
+: A system used to monitor activities, progress, and performance.
+Database
+: An organized collection of related data stored electronically for easy access and management.
+Supervisor
+: A lecturer or officer assigned to monitor students during SIWES.
+Administrator
+: A person responsible for managing the system and records.
+Implementation
+: The process of developing, testing, and deploying a system for use.
+Web-Based System
+: A system that operates through a web browser using internet or intranet access.
+Chapter TWO
+Literature Review
+2.1 Introduction
+This chapter reviews the literature on the use of web-based systems for managing and monitoring the Students' Industrial Work Experience Scheme (SIWES). The literature review is divided into three major sections. The first section, the theoretical background, highlights the major concepts and technologies supporting the development of the Student SIWES Activity Tracking System. The second section reviews the literatures from similar works conducted by other researchers, presenting the aims, methodology, results and relationship of each to the current project. Finally, the third section points out the research/knowledge gap this project is meant to fill. 
+2.2 Theoretical Background
+ 
+This section gives a theoretical background for the design and implementation of the Student SIWES Activity Tracking System. It is divided into two sub-sections. The first part discusses the major concepts 
+supporting
+ the development of the system, while the second highlights the underlying technologies employed in developing the system. 
+2.
+2
+.1 Concepts
+ 
+Students' Industrial Work Experience Scheme (SIWES)
+: SIWES is a skills-training program established in Nigeria by the Industrial Training Fund (ITF) in 1973 to reduce the gap between the knowledge acquired theoretically in schools and the skills needed in industry. SIWES is a tripartite arrangement involving the Student, the Institution and the Industry (Host Employer), where ITF serves as the coordinating and financing agency. 
+Logbook/Activity Log
+: Traditionally, SIWES involves the use of a logbook which is a physical booklet where the student records the activities he or she undertakes everyday. This includes the tasks undertaken, the skills acquired and the challenges met during the industrial attachment period. The logbook is reviewed and signed off by the supervisor(s) and used to evaluate the performance of the student. For this project, the logbook is replaced with an "activity log" which is an electronic record stored in a database that makes it impossible to enter records retroactively. 
+Role-Based Access Control (RBAC)
+: RBAC is a method of restricting user access to system resources based on their roles in the organization. In the multi-user system described in this project, RBAC enables students, school-based supervisors, industry supervisors, institution coordinators, and ITF officers to only view the data and execute the functions pertinent to them. 
+Web-Based Information System
+: Web-based information system is an application accessed via a web browser over the internet where presentation, processing and storage of data are logically separated into three different layers. Through this design, the system can be accessed remotely by various users without the installation of any local software.
+2.2.2 Technologies
+React.js
+: React.js is a JavaScript library for building interactive user interfaces through reusable components. It is used in this project to implement the presentation layer, providing a responsive interface accessible from both desktop and mobile browsers.
+Node.js and Express.js: Node.js is a JavaScript runtime environment that allows JavaScript to be executed outside a web browser, commonly used to build the server-side (back-end) logic of web applications. Express.js is a minimal and flexible Node.js framework used to build the RESTful Application Programming Interface (API) that mediates communication between the front-end and the database in this project.
+MySQL
+: MySQL is an open-source relational database management system (RDBMS) that organizes data into structured tables with defined relationships. It is adopted in this project as the data layer, storing student, supervisor, activity log, placement, and notification records with enforced referential integrity.
+JSON Web Tokens (JWT) and Role-Based Authentication
+: JWT is a compact, self-contained means of securely transmitting information between parties as a digitally signed JSON object. In this project, JWT is used to authenticate users statelessly and to encode role information used for authorization decisions across the five actor categories.
+2.3 Review of Related Literature
+This section reviews six closely related studies on the design and implementation of web-based systems for SIWES and internship management. Each study is summarized in terms of its aim, methodology and findings, followed by a statement of its relationship, similarities, and differences with the present study.
+Onihunwa et al. (2020) developed the Obong SIWES Online Interactive Platform, a web portal built with HTML, CSS, Bootstrap, SQL, and JavaScript, and designed using a modified Waterfall model. The platform allowed students to fill and submit their logbooks and final reports electronically, while supervisors could access and grade logbook entries at any point during the training period, and the SIWES coordinator could monitor overall progress. The study concluded that the portal successfully digitized the paper-based logbook process for the case institution studied. This work is closely related to the present study in that both digitize the SIWES logbook and provide differentiated access for students and supervisors. However, the Obong SIWES portal was built with a simpler, static-page technology stack (PHP/HTML/Bootstrap) rather than a modern three-tier, API-driven architecture, and it modeled only three broad actor categories (Student, Supervisor/IBS, and SIWES Coordinator/ITF) without granular role separation. It also did not incorporate timestamped submission specifically to prevent backdated entries, automated notifications, or exportable reports, all of which are addressed in the proposed Student SIWES Activity Tracking System.
+Adetiba et al. (2012) developed the e-SIWES Portal, a web-based platform intended to enhance the manual processes of SIWES registration, information dissemination, logbook completion, and supervision/assessment by lecturers and industry-based supervisors. The portal digitized the logbook and assessment forms and allowed supervisors to be assigned to students and to monitor them in near real time, in addition to enabling broadcast messaging to all students at once. Like the present study, the e-SIWES Portal is a web-based platform aimed at eliminating the inefficiencies of the manual, paper-based SIWES logbook and assessment process. It differs, however, in that it was developed over a decade ago using an older technology stack and does not incorporate modern security mechanisms such as password hashing or token-based authentication, structured role-based access control across five distinct actor categories, or automated, event-triggered email notifications, all of which form part of the proposed system's design.
+Afolayan and Onoriode (2025) designed and implemented a secure, role-based, web-enabled SIWES logbook system at the Federal University of Technology, Akure (FUTA), following the Waterfall Software Development Life Cycle. The system adopted a four-tier architecture comprising a React.js presentation layer, a Node.js application layer, a MySQL data layer, and a dedicated security layer employing Bcrypt password hashing, JSON Web Tokens (JWT) for stateless authentication, and Role-Based Access Control (RBAC). A usability and security evaluation involving 40 participants found that a majority of users were satisfied with the system, rated it easy to navigate, considered it secure, and preferred it over the paper-based logbook. 
+This study is the most technologically similar to the present work, sharing the same core stack
+; 
+React.js, Node.js, and MySQL — as well as JWT-based authentication and role-based access control. The key differences are that the FUTA system was deployed only in a temporary test environment for a single institution and was not integrated with the Industrial Training Fund (ITF) for national-level verification or stipend eligibility, whereas the proposed Student SIWES Activity Tracking System explicitly incorporates an ITF Officer role with cross-institutional, read-only access for verification and reporting purposes, along with exportable PDF reports and automated email notifications tied to workflow events.
+Jaafar et al. (2017), in a study carried out at Universiti Teknologi MARA (UiTM), Malaysia, developed a web-based system for monitoring and supervising student internships. The system computerized internship eligibility checking, registration, industry visit scheduling, and monitoring of the internship 
+program
+, making these processes accessible online rather than requiring physical, in-person coordination. This study is related to the present work in its shared objective of replacing manual, visit-dependent supervision with an online monitoring system. It differs substantially in scope and context: it was developed for the Malaysian industrial training system rather than the Nigerian SIWES/ITF framework, it emphasizes eligibility checking and visit scheduling rather than daily, timestamped activity logging, and it does not model the five distinct actor roles (Student, School-based Supervisor, Industry Supervisor, Institution Coordinator, and ITF Officer) that structure the proposed system's role-based dashboards.
+Nurfaizi and Hindarto (2023) developed a Web-Based Student Internship Attendance Application System, designed using the Waterfall method, to streamline the recording of student internship 
+attendance. The system allowed students to record daily attendance through mobile devices or computers and to submit reports on their daily assignments and experiences, while giving 
+program
+ organizers instantaneous access to attendance data for management and evaluation purposes. This work shares with the present study the goal of replacing manual, paper-based recording with a web-based, timestamped system that supports daily reporting by students. However, its scope is narrower, concentrating specifically on attendance monitoring rather than a full activity-logging and multi-stage supervisor review-and-approval workflow. It also does not model a multi-actor, role-based structure comparable to the five actor categories in the proposed system, nor does it address stipend or funding-body verification, which is central to the Nigerian SIWES context addressed by this project.
+Ele et al. (2017) examined the semi-automated and largely manual nature of SIWES registration and stipend payment processes in Nigeria, under which students queue physically for registration and again for the disbursement of ITF stipends. In response, the authors designed and implemented the SIWES Registration and Payment System (SIWES-RPS), a web-based platform intended for use by students, institutional supervisors, and SIWES-based supervisors to computerize registration and payment documentation and reduce the associated delays. This study is closely related to the present work in its identification of manual registration and stipend-payment inefficiencies within the Nigerian SIWES/ITF system, which the proposed Student SIWES Activity Tracking System also addresses through its ITF Officer role for stipend eligibility validation. The SIWES-RPS, however, focuses specifically on registration and payment processing rather than daily activity logging and supervisor review, and it does not provide the real-time, timestamped logbook functionality, role-based dashboards for five distinct actor categories, or automated notification system that form the core of the proposed system.
+2.4 Research/Literature/Knowledge Gap
+The literature reviewed shows that a substantial body of work exists on the digitization of SIWES and internship management processes in Nigeria and beyond, ranging from early web-based portals (Onihunwa et al., 2020; Adetiba et al., 2012) and registration/payment-focused systems (Sylvester et al., 2017), to narrower attendance-tracking systems (Nurfaizi & Hindarto, 2023) and 
+internship-supervision systems developed outside the Nigerian SIWES/ITF framework (Jaafar et al., 2017). More recent work has begun to incorporate modern security practices such as password hashing and token-based, role-based authentication (Afolayan & Onoriode, 2025), using a technology stack closely comparable to that adopted in this project.
+Nevertheless, none of the reviewed studies combines, in a single system, all of the following: (i) a modern, secure, three-tier React.js/Node.js/MySQL architecture with JWT-based, role-based access control; (ii) timestamped, tamper-resistant daily activity logging designed specifically to prevent backdated or fraudulent entries; (iii) differentiated, role-based dashboards for five distinct actor categories ; Student, School-based Supervisor, Industry Supervisor, Institution Coordinator, and ITF Officer, reflecting the full tripartite structure of the Nigerian SIWES scheme; (iv) an ITF Officer role with cross-institutional, read-only access for logbook verification and stipend eligibility validation; and (v) automated, event-triggered email notifications together with exportable PDF reporting for institutional and ITF submission.
+This gap constitutes the specific contribution of the present study. The Student SIWES Activity Tracking System is designed to integrate secure, modern authentication and role-based access control with comprehensive, multi-actor activity tracking and ITF-level verification within a single, unified, web-based platform, thereby addressing the combined weaknesses of fraudulent logbook entries, inadequate supervision, loss of records, delayed stipend payments, and poor cross-stakeholder communication identified in the existing SIWES literature.
+C
+hapter
+ THREE
+Systems Analysis and Design
+3.
+1
+ Introduction
+This chapter presents the research methodology adopted for the design and implementation of the Student SIWES Activity Tracking System, an analysis of the existing system, and a comprehensive description of the proposed system. It also presents the system design, including UML diagrams, database schema, and the high-level model of the proposed solution. The methodology, system analysis, and design components outlined herein are guided by the Object-Oriented Analysis and Design Methodology (OOADM) using the Unified Modeling Language (UML).
+3.
+2
+ Methodology
+Several software development methodologies exist for the analysis and design of information systems. 
+The most common of them are SSADM (Structured Systems Analysis and Design Method), OOADM (Object Oriented Analysis and Design Methodology), Agile/Scrum approach, Waterfall model, and Prototype model. Each of them has their own features, benefits and limitations that need to be considered regarding the needs of the project.
+The SSADM is a structured approach to modeling systems that uses DFD (Data Flow Diagram) and ERD (Entity Relationship Diagram) models of the systems. It is best used when working on data oriented, batch processing systems where process flows are well defined and linear. Similar to it, the Waterfall model is inflexible and cannot handle iteration after certain stage completion. The Agile/Scrum approach, although highly flexible and user-centered, is better used for rapidly changing requirements environment.
+The Object Oriented Analysis and Design Methodology (OOADM), based on the Unified Modeling Language (UML), has been chosen to develop this project. The reason for choosing this methodology is that this system is role-based and actor-oriented, there are many actors involved in the processes in the system – Students, School-based Supervisors, Industry Supervisors, Institution Coordinators and ITF Officers, each one has his/her own role and interaction. OOADM models the system as set of interacting objects that makes this methodology highly effective for modeling the multi actor system.
+Using OOADM approach in this project gives us an opportunity to use UML diagrams – Use Case Diagram, Activity Diagram, Class Diagram, Sequence Diagram which provide us with complete graphical description of the system structure and behavior. This methodology will be implemented in the following stages – requirements analysis (Use Case and Activity Diagrams), design (Class and Sequence Diagrams and database structure) and implementation.
+3.
+3
+ Systems Analysis
+Systems analysis is the process of studying an existing system to identify its strengths and weaknesses, with the goal of designing a superior replacement. This section presents a description of the existing SIWES management system and an analysis of the proposed system.
+3.
+3
+.1 Description of the Existing System
+The management of the Students' Industrial Work Experience Scheme (SIWES) currently in Nigerian higher education institutions, including University of Nigeria, Nsukka, is highly manual and based on paper. Students are provided with paper log books right from the start of their industrial training. The log books are supposed to be written daily in terms of what activities were carried out by the student, what he/she learned and what problems he/she encountered in his/her place of attachment.
+Periodically during the duration of training, a school-based supervisor is supposed to go physically to the place of attachment of the student to check whether the log book entries are true, meet the industry supervisor and evaluate the student. After the completion of training, the student presents his/her log book to the departmental SIWES coordinator, who then submits it to ITF for validation and stipend payment.
+Institutional coordinators maintain manual records of student placements, and all communication between the student, supervisors, institution, and the ITF is conducted via physical documentation, verbal interactions, or informal digital channels such as email and phone calls. The existing system provides no structured digital platform for real-time activity tracking, role-based access to records, or automated reporting.
+Figure 3.1: Flowchart of Existing System and the Limitations
+3.
+3
+.1.1 Weaknesses of the Existing System
+A thorough study of the existing SIWES management system reveals the following critical weaknesses:
+Fraudulent Logbook Entries: Since students fill paper logbooks manually and supervisors can only visit once or twice during the training period, it is practically impossible to verify whether entries are made daily or filled retroactively at the end of the training period. This compromises the integrity of the scheme.
+Inadequate Supervision: School-based supervisors face logistical and financial constraints in physically visiting students at remote or distant attachment locations. This results in most students receiving little to no in-person supervision throughout the training.
+Loss and Damage of Records: Physical logbooks are susceptible to loss, damage, or deterioration, leading to permanent loss of student records that are required for ITF verification and stipend payment.
+Delayed and Failed Stipend Payments: Non-verification of logbooks, late submission of placement lists, and missing bank details — all consequences of the manual system — result in delayed or failed ITF allowance payments to students.
+Lack of Real-Time Monitoring: Neither the institution, the school-based supervisor, nor the ITF has any mechanism for monitoring a student's daily activities in real time during the training period.
+Inefficient Communication: Information dissemination among students, supervisors, institution coordinators, and the ITF relies on informal channels, causing delays and miscommunication.
+Poor Data Management: The manual collation of placement lists, logbooks, bank details, and assessment forms by SIWES coordinators is error-prone and time-consuming, particularly given the large number of students involved each academic year.
+3.
+3
+.2 Analysis of the Proposed System
+The proposed Student SIWES Activity Tracking System is a web-based platform designed to digitize, streamline, and enhance the management of SIWES activities across all stakeholders. The system introduces a role-based architecture that grants differentiated access and functionality to each category of user — Students, School-based Supervisors, Industry Supervisors, Institution Coordinators, and ITF Officers — based on their defined responsibilities within the scheme.
+The system will operate on a three-tier web architecture comprising a presentation layer (React.js front-end), an application logic layer (Node.js/Express.js back-end REST API), and a data layer (MySQL relational database). The platform will be accessible via standard web browsers and is designed to be responsive for use on both desktop and mobile devices.
+Key functionalities of the proposed system include:
+Student daily activity logging with timestamped entries, eliminating the possibility of backdated or fraudulent submissions.
+Role-based dashboards for all five actor categories, each displaying relevant data, actions, and notifications.
+Real-time supervisor access to student logbook entries, enabling prompt review, comments, and approval or rejection of daily logs.
+Digital supervisor visit scheduling and confirmation, replacing the uncoordinated physical visit process.
+Institutional coordinator oversight of all students registered under their institution, with placement management and report generation capabilities.
+ITF Officer access to cross-institutional student data for logbook verification and stipend eligibility validation.
+Automated email notifications to relevant parties upon key events such as log submission, supervisor comment, and approval status updates.
+Exportable reports in PDF format for institutional records and ITF submission.
+Table 3.1: Actor-Use Case Summary
+Actor
+Use Case
+Student
+Register / Login, Submit daily activity log, View supervisor feedback, Track SIWES progress, Submit final report
+School-based Supervisor
+Login, View assigned students, Review & comment on activity logs, Approve or reject entries, Schedule visits
+Industry Supervisor
+Login, Monitor student activities at placement, Endorse logbook entries, Submit student performance report
+Institution Coordinator
+Login, Register students for SIWES, Assign supervisors, Generate placement reports, Monitor institution-wide progress
+ITF Officer
+Login, View all students across institutions, Verify logbooks, Validate stipend eligibility, Generate national reports
+3.
+3
+.2.1 The Use Case Diagram of the 
+Proposed
+ System
+The Use Case Diagram below presents a high-level view of the interactions between the five actors and the SIWES Activity Tracking System. Each actor interacts with the system through defined use cases corresponding to their role and responsibilities.
+Figure 3.
+2
+: Use Case Diagram
+The Student actor initiates the primary data-entry interactions, including account registration, daily log submission, and final report upload. The School-based Supervisor reviews and provides feedback on log entries. The Industry Supervisor monitors on-site performance and endorses entries. The Institution Coordinator manages student registration and supervisor assignments at the institutional level. The ITF Officer has read-only access across institutions for verification and reporting purposes.
+3.
+3
+.2.2 The Activity Diagram
+The Activity Diagram illustrates the step-by-step workflow of the core process in the system — the daily activity logging and approval workflow between a Student and their assigned School-based Supervisor.
+Figure 3.
+3
+: Ac
+t
+ivity Diagram — Student Daily Log Submission and Approval
+The workflow proceeds as follows: The student logs into the system and navigates to the activity log submission form. The student enters the date, description of activities performed, and skills acquired, then submits the entry. The system timestamps and stores the submission and notifies the assigned supervisor. The supervisor reviews the entry and either approves it, rejects it with a comment, or defers review. Upon approval, the log is marked as verified. If rejected, the student receives a notification and may revise and resubmit the entry.
+3.
+3
+.3 Instantiation of the Model
+The proposed system adopts a layered web application architecture model comprising three principal tiers: the Presentation Layer, the Business Logic Layer, and the Data Layer. This three-tier model is a well-established architectural pattern for enterprise web systems, offering clear separation of concerns, improved maintainability, and scalability.
+Presentation Layer: Built with React.js, this layer handles all user interface components and user interactions. It communicates with the backend exclusively through RESTful API calls.
+Business Logic Layer: Implemented with Node.js and the Express.js framework, this layer processes all application logic, enforces role-based access control (RBAC), handles authentication via JSON Web Tokens (JWT), and manages communication between the front-end and the database.
+Data Layer: MySQL serves as the relational database management system. All entities, relationships, and constraints are formally defined in the schema presented in Section 3.3.3.
+Figure 3.
+4
+: 
+Architecture
+ of the Proposed Syste
+m
+3.
+4
+ System Design
+System design translates the requirements identified in the systems analysis phase into a concrete technical blueprint. This section presents the Class Diagram, Sequence Diagram, and Database Design for the proposed SIWES Activity Tracking System.
+3.
+4
+.1 The Class Diagram
+The Class Diagram models the static structure of the system, depicting the principal classes, their attributes, methods, and the relationships between them. The core classes identified for the SIWES Activity Tracking System are as follows:
+User (abstract base class): Attributes — user_id, full_name, email, password_hash, role, created_at. Methods — login(), logout(), updateProfile().
+Student (extends User): Attributes — matric_no, department, institution, year_of_study. Methods — submitActivityLog(), viewFeedback(), uploadFinalReport().
+Supervisor (extends User): Attributes — supervisor_type (school/industry/coordinator/itf), department, company. Methods — reviewLog(), approveLog(), rejectLog(), addComment().
+ActivityLog: Attributes — log_id, student_id, log_date, description, skills_acquired, status, supervisor_comment, submitted_at. Methods — submit(), revise(), getStatus().
+Placement: Attributes — placement_id, student_id, company_name, address, industry_supervisor_id, start_date, end_date. Methods — registerPlacement(), updatePlacement().
+Notification: Attributes — notification_id, recipient_id, message, is_read, created_at. Methods — send(), markAsRead().
+Figure 3.
+5
+: Class Diagram
+3.
+4
+.2 The Sequence Diagram
+The Sequence Diagram models the dynamic interaction between objects in the system over time for a specific use case. The sequence diagram below captures the interaction for the core use case: Student Submits Daily Activity Log and Supervisor Reviews It.
+The sequence of interactions is as follows: (1) The Student authenticates via the login interface; the system validates credentials against the database and returns a JWT token. (2) The Student submits an activity log entry; the system validates the form data, persists the record to the ActivityLog table with status set to 'pending', and triggers a notification to the assigned supervisor. (3) The Supervisor receives the notification, logs in, and navigates to the review dashboard. (4) The Supervisor reviews the entry and submits an approval or rejection with optional comments. 
+(5) The system updates the ActivityLog status, records the supervisor comment, and dispatches a notification to the Student confirming the outcome.
+Figure 3.
+6
+: Sequence Diagram — Daily Log Submission and Review
+3.
+4
+.3 Database Design
+The database management system adopted for this project is MySQL, a robust, open-source relational database management system widely used in web application development. MySQL was selected for its reliability, support for ACID transactions, strong community support, and seamless integration with the Node.js/Express.js back-end via the mysql2 driver.
+The database schema comprises the following principal tables: students, supervisors, activity_logs, placements, and notifications. The required entities, their fields, data types, constraints, and descriptions are presented below.
+Table 3.2: students Table
+Field
+Data Type
+Size
+NULL
+Description
+Constraint
+student_id
+INT
+11
+NO
+Unique student identifier
+PRIMARY KEY, AUTO_INCREMENT
+matric_no
+VARCHAR
+20
+NO
+Matriculation number
+UNIQUE
+full_name
+VARCHAR
+100
+NO
+Full name of student
+—
+email
+VARCHAR
+100
+NO
+Student email address
+UNIQUE
+department
+VARCHAR
+80
+NO
+Student department
+—
+institution
+VARCHAR
+100
+NO
+Institution name
+—
+password_hash
+VARCHAR
+255
+NO
+Hashed login password
+—
+created_at
+DATETIME
+—
+NO
+Account creation timestamp
+DEFAULT NOW()
+Table 3.3: activity_logs Table
+Field
+Data Type
+Size
+NULL
+Description
+Constraint
+activity_id
+INT
+11
+NO
+Unique activity log ID
+PRIMARY KEY, AUTO_INCREMENT
+student_id
+INT
+11
+NO
+Student who logged activity
+FOREIGN KEY → students
+log_date
+DATE
+—
+NO
+Date of the activity
+—
+description
+TEXT
+—
+NO
+Description of daily activity
+—
+skills_acquired
+TEXT
+—
+YES
+Skills gained from activity
+—
+supervisor_comment
+TEXT
+—
+YES
+Feedback from supervisor
+—
+status
+ENUM
+—
+NO
+pending / approved / rejected
+DEFAULT 'pending'
+submitted_at
+DATETIME
+—
+NO
+Timestamp of submission
+DEFAULT NOW()
+Table 3.4: supervisors Table
+Field
+Data Type
+Size
+NULL
+Description
+Constraint
+supervisor_id
+INT
+11
+NO
+Unique supervisor ID
+PRIMARY KEY, AUTO_INCREMENT
+full_name
+VARCHAR
+100
+NO
+Supervisor full name
+—
+email
+VARCHAR
+100
+NO
+Supervisor email address
+UNIQUE
+role
+ENUM
+—
+NO
+school / industry / itf / coordinator
+—
+department
+VARCHAR
+80
+YES
+Department (school supervisors)
+—
+company
+VARCHAR
+100
+YES
+Company name (industry supervisors)
+—
+password_hash
+VARCHAR
+255
+NO
+Hashed login password
+—
+Additional tables in the schema include placements (storing student placement location, industry supervisor assignment, start and end dates) and notifications (storing system-generated messages for all actors). Foreign key relationships enforce referential integrity across all tables, ensuring that activity logs are always linked to valid students and that supervisor assignments reference existing supervisor records.
+3.
+4.4
+ 
+Input Design
+The input design of the SIWES Activity Tracking System emphasizes accuracy and timely data collection through carefully designed web-based forms tailored for each specific user role. The main source of data will be the activity log provided by students every day. Here, the student must fill in the date, describe his or her activities and note the skills gained. Importantly, the submission of this log will be automatically timestamped, thus precluding any fraudulent data submissions. 
+Other inputs to the system will be the registration data and the assignment of a supervisor provided by the Institution Coordinator, along with the decision to approve activities, feedback comments and scheduling data of visits provided by school- and industry-based supervisors. 
+3.
+4
+.5 
+Output Design
+The output design allows for easy information presentation, timely communication and formal documentation. The main outputs in terms of information presentation will be the role-based dashboards that will show data that is relevant for each user based on his or her access level. For improved communication, automated email notifications will be generated for certain events like submitting logs and results of supervisor evaluation. The system will also generate PDF documents that can be exported and used as the required output document for record-keeping and verification of ITF logbook and stipends.
+Figure 3.7: Input/Output diagram
+3.5 
+About the Methodology Tools
+About OOADM
+Object-Oriented Analysis and Design Methodology (OOADM) is an approach to software engineering that models a system as a collection of interacting objects. Each object is an instance of a class, encapsulating both data (attributes) and behaviour (methods). OOADM provides a natural mapping between real-world entities and software constructs, making it highly suitable for systems with complex actor interactions such as the SIWES Activity Tracking System.
+About UML
+Chapter FOUR
+System Implementation and Documentation
+
+REFERENCES
+Adetiba, E., Matthews, V. O., Egunjobi, V. O., & Olajide, A. T. (2012). Development of e-SIWES portal: A web based platform for Student Industrial Work Experience Scheme (SIWES) management. 
+International Journal of Applied Information Systems
+, 3(8), 10–17. 
+http://dx.doi.org/10.5120/ijais12-450577
+Afolayan, A. H., & Onoriode, T. M. (2025). Development of a web-based SIWES logbook management system with secure authentication and role-based access: A case study of Federal University of Technology, Akure, Ondo State. 
+Journal of Science, Technology and Innovation Research (JOSTIR), 1
+(Special Issue). 
+http://dx.doi.org/10.51459/jostir.2025.1.Special-Issue.059
+Ele, S. I., Alani, A. O., & Do, E. (2017). Computerization of the Students' Industrial Work Experience Scheme (SIWES) Registration and Payment System (SIWES-RPS) in Nigeria. 
+Scholars Journal of Engineering and Technology, 5
+(3), 104–116. 
+http://dx.doi.org/10.21276/sjet.2017.5.3.6
+Jaafar, A. N., Rohafauzi, S., Enzai, N. I. M., Mohd Fauzi, F. D. H., Nik Dzulkefli, N. N. S., & Amron, M. T. (2017). Development of internship monitoring and supervising web-based system. In 
+2017 IEEE 15th Student Conference on Research and Development (SCOReD)
+ (pp. 193–197). IEEE. 
+http://dx.doi.org/10.1109/SCORED.2017.8305395
+Nurfaizi, K., & Hindarto, D. (2023). Web-based student internship attendance application system for effective student attendance monitoring. 
+International Journal Software Engineering and Computer Science (IJSECS), 3
+(3), 238–245. 
+http://dx.doi.org/10.35870/ijsecs.v3i3.1760
+Onihunwa, J. O., Inyene, P. U., Archibong, E. U., Joshua, D. A., Irunokhai, E. A., & Omole, E. B. (2020). Student Industrial Work Experience Scheme (SIWES) online interactive platform for students and school supervisors. 
+International Journal of Innovative Information Systems & Technology Research, 8
+(3), 1–13.
