@@ -13,8 +13,18 @@ import {
   FileText,
   AlertCircle,
   Plus,
-  XCircle
+  XCircle,
+  GraduationCap,
+  Globe,
+  SlidersHorizontal,
+  Check
 } from 'lucide-react';
+import {
+  COUNTRIES,
+  NIGERIAN_STATES,
+  INSTITUTION_CATEGORIES,
+  ACCREDITED_INSTITUTIONS
+} from '../data/nigerianInstitutions';
 
 const ItfDashboard = () => {
   const [activeTab, setActiveTab] = useState('reports'); // 'reports', 'students', 'institutions', 'export'
@@ -29,9 +39,15 @@ const ItfDashboard = () => {
   const [actionLoading, setActionLoading] = useState(null);
   const [message, setMessage] = useState({ text: '', type: '' });
 
-  // Onboard Institution Modal
+  // Onboard Institution Modal with Cascading Directory Selection
   const [showOnboardModal, setShowOnboardModal] = useState(false);
   const [onboardingLoading, setOnboardingLoading] = useState(false);
+  const [selectedCountry, setSelectedCountry] = useState('Nigeria');
+  const [selectedState, setSelectedState] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedInstitution, setSelectedInstitution] = useState('');
+  const [isManualEntry, setIsManualEntry] = useState(false);
+
   const [onboardForm, setOnboardForm] = useState({
     name: '',
     code: '',
@@ -40,6 +56,96 @@ const ItfDashboard = () => {
     coordinator_email: '',
     password: ''
   });
+
+  const resetOnboardForm = () => {
+    setOnboardForm({
+      name: '',
+      code: '',
+      state: '',
+      coordinator_name: '',
+      coordinator_email: '',
+      password: ''
+    });
+    setSelectedCountry('Nigeria');
+    setSelectedState('');
+    setSelectedCategory('');
+    setSelectedInstitution('');
+    setIsManualEntry(false);
+  };
+
+  const filteredDirectoryInstitutions = ACCREDITED_INSTITUTIONS.filter(inst => {
+    if (selectedState && inst.state !== selectedState) return false;
+    if (selectedCategory && inst.category !== selectedCategory) return false;
+    return true;
+  });
+
+  const selectedInstDetails = ACCREDITED_INSTITUTIONS.find(i => i.name === selectedInstitution);
+
+  const handleStateChange = (stateName) => {
+    setSelectedState(stateName);
+    if (selectedInstitution && selectedInstitution !== 'CUSTOM') {
+      const found = ACCREDITED_INSTITUTIONS.find(i => i.name === selectedInstitution);
+      if (found && stateName && found.state !== stateName) {
+        setSelectedInstitution('');
+        setOnboardForm(prev => ({ ...prev, name: '', code: '', state: stateName }));
+      } else if (stateName) {
+        setOnboardForm(prev => ({ ...prev, state: stateName }));
+      }
+    } else if (stateName) {
+      setOnboardForm(prev => ({ ...prev, state: stateName }));
+    }
+  };
+
+  const handleCategoryChange = (categoryName) => {
+    setSelectedCategory(categoryName);
+    if (selectedInstitution && selectedInstitution !== 'CUSTOM') {
+      const found = ACCREDITED_INSTITUTIONS.find(i => i.name === selectedInstitution);
+      if (found && categoryName && found.category !== categoryName) {
+        setSelectedInstitution('');
+        setOnboardForm(prev => ({ ...prev, name: '', code: '' }));
+      }
+    }
+  };
+
+  const handleInstitutionSelect = (instName) => {
+    setSelectedInstitution(instName);
+    if (!instName) {
+      setOnboardForm(prev => ({
+        ...prev,
+        name: '',
+        code: '',
+        state: selectedState || ''
+      }));
+      return;
+    }
+    if (instName === 'CUSTOM') {
+      setIsManualEntry(true);
+      setOnboardForm(prev => ({
+        ...prev,
+        name: '',
+        code: '',
+        state: selectedState || ''
+      }));
+      return;
+    }
+
+    const found = ACCREDITED_INSTITUTIONS.find(i => i.name === instName);
+    if (found) {
+      setIsManualEntry(false);
+      if (found.state && (!selectedState || selectedState !== found.state)) {
+        setSelectedState(found.state);
+      }
+      setOnboardForm(prev => ({
+        ...prev,
+        name: found.name,
+        code: found.code,
+        state: found.state,
+        coordinator_email: (!prev.coordinator_email || prev.coordinator_email.includes('@')) 
+          ? `coordinator@${found.domain}` 
+          : prev.coordinator_email
+      }));
+    }
+  };
 
   const loadData = async () => {
     try {
@@ -88,21 +194,18 @@ const ItfDashboard = () => {
     e.preventDefault();
     try {
       setOnboardingLoading(true);
-      const res = await api.post('/institutions', onboardForm);
+      const payload = {
+        ...onboardForm,
+        password: onboardForm.password ? onboardForm.password : 'password123'
+      };
+      const res = await api.post('/institutions', payload);
       if (res.data.success) {
         setMessage({
           text: `Successfully accredited ${onboardForm.name} (${onboardForm.code.toUpperCase()}) and onboarded Coordinator ${onboardForm.coordinator_name}!`,
           type: 'success'
         });
         setShowOnboardModal(false);
-        setOnboardForm({
-          name: '',
-          code: '',
-          state: '',
-          coordinator_name: '',
-          coordinator_email: '',
-          password: ''
-        });
+        resetOnboardForm();
         loadData();
       }
     } catch (err) {
@@ -687,59 +790,205 @@ const ItfDashboard = () => {
         </div>
       )}
 
-      {/* MODAL: Onboard Institution & Coordinator */}
+      {/* MODAL: Onboard Institution & Coordinator with Cascading Hierarchy */}
       {showOnboardModal && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(3px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '16px' }}>
-          <div className="glass-panel" style={{ width: '100%', maxWidth: '520px', maxHeight: '90vh', overflowY: 'auto' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+          <div className="glass-panel" style={{ width: '100%', maxWidth: '600px', maxHeight: '92vh', overflowY: 'auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '18px' }}>
               <div>
-                <h3 style={{ fontSize: '1.15rem' }}>Onboard Accredited Institution & Coordinator</h3>
-                <p style={{ fontSize: '0.85rem' }}>Authorize a tertiary institution and designate their official SIWES Coordinator.</p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                  <span style={{ backgroundColor: 'var(--primary)', color: '#fff', fontSize: '0.7rem', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    ITF Accreditation Portal
+                  </span>
+                  <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>National Directory Integration</span>
+                </div>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 700 }}>Onboard Accredited Institution</h3>
+                <p style={{ fontSize: '0.84rem' }}>Select from accredited Nigerian tertiary institutions or enter unlisted parameters to provision coordinator credentials.</p>
               </div>
-              <button type="button" onClick={() => setShowOnboardModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}>
+              <button
+                type="button"
+                onClick={() => { setShowOnboardModal(false); resetOnboardForm(); }}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}
+              >
                 <XCircle size={22} />
               </button>
             </div>
 
             <form onSubmit={handleOnboardInstitution}>
-              <div className="input-group">
-                <label>Institution Full Name *</label>
-                <input
-                  type="text"
-                  required
-                  className="input-field"
-                  placeholder="e.g. Obafemi Awolowo University"
-                  value={onboardForm.name}
-                  onChange={(e) => setOnboardForm({ ...onboardForm, name: e.target.value })}
-                />
+              {/* SECTION 1: Cascading Directory Filters */}
+              <div style={{ backgroundColor: '#f8fafc', border: '1px solid var(--border-subtle)', borderRadius: '8px', padding: '16px', marginBottom: '18px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <GraduationCap size={16} color="#059669" /> 1. Parameter Directory Selection
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsManualEntry(!isManualEntry);
+                      if (!isManualEntry) {
+                        setSelectedInstitution('CUSTOM');
+                      } else {
+                        setSelectedInstitution('');
+                      }
+                    }}
+                    style={{ background: 'none', border: 'none', color: '#0284c7', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}
+                  >
+                    {isManualEntry ? '← Switch to Directory List' : 'Manual Entry (Unlisted)'}
+                  </button>
+                </div>
+
+                {/* Country Filter */}
+                <div className="input-group" style={{ marginBottom: '10px' }}>
+                  <label style={{ fontSize: '0.8rem', fontWeight: 600 }}>Country</label>
+                  <select
+                    className="select-field"
+                    value={selectedCountry}
+                    onChange={(e) => {
+                      setSelectedCountry(e.target.value);
+                      if (e.target.value !== 'Nigeria') {
+                        setIsManualEntry(true);
+                        setSelectedInstitution('CUSTOM');
+                        setOnboardForm(prev => ({ ...prev, name: '', code: '', state: '' }));
+                      } else {
+                        setIsManualEntry(false);
+                        setSelectedInstitution('');
+                      }
+                    }}
+                  >
+                    {COUNTRIES.map(c => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {selectedCountry === 'Nigeria' && (
+                  <>
+                    {/* State & Category Selectors */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '10px' }}>
+                      <div className="input-group" style={{ marginBottom: 0 }}>
+                        <label style={{ fontSize: '0.8rem', fontWeight: 600 }}>State (36 States + FCT)</label>
+                        <select
+                          className="select-field"
+                          value={selectedState}
+                          onChange={(e) => handleStateChange(e.target.value)}
+                        >
+                          <option value="">-- All States (37) --</option>
+                          {NIGERIAN_STATES.map(st => (
+                            <option key={st} value={st}>{st}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="input-group" style={{ marginBottom: 0 }}>
+                        <label style={{ fontSize: '0.8rem', fontWeight: 600 }}>Institution Type / Level</label>
+                        <select
+                          className="select-field"
+                          value={selectedCategory}
+                          onChange={(e) => handleCategoryChange(e.target.value)}
+                        >
+                          <option value="">-- All Categories --</option>
+                          {INSTITUTION_CATEGORIES.map(cat => (
+                            <option key={cat} value={cat}>{cat}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Filtered Institutions Dropdown */}
+                    {!isManualEntry && (
+                      <div className="input-group" style={{ marginBottom: 0 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <label style={{ fontSize: '0.8rem', fontWeight: 600 }}>Accredited Institutions Directory</label>
+                          <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                            {filteredDirectoryInstitutions.length} institutions match filters
+                          </span>
+                        </div>
+                        <select
+                          className="select-field"
+                          value={selectedInstitution}
+                          onChange={(e) => handleInstitutionSelect(e.target.value)}
+                        >
+                          <option value="">
+                            -- Select Institution ({filteredDirectoryInstitutions.length} available) --
+                          </option>
+                          {filteredDirectoryInstitutions.map(inst => (
+                            <option key={`${inst.code}-${inst.name}`} value={inst.name}>
+                              {inst.name} ({inst.code}) — {inst.category} [{inst.state}]
+                            </option>
+                          ))}
+                          <option value="CUSTOM">➕ Other / Unlisted Institution (Enter Manually)</option>
+                        </select>
+                      </div>
+                    )}
+                  </>
+                )}
+
+                {/* Selected Institution Pill */}
+                {selectedInstDetails && !isManualEntry && (
+                  <div style={{ marginTop: '12px', padding: '10px 14px', backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <div style={{ fontSize: '0.86rem', fontWeight: 700, color: '#166534' }}>
+                        {selectedInstDetails.name} ({selectedInstDetails.code})
+                      </div>
+                      <div style={{ fontSize: '0.76rem', color: '#15803d', marginTop: '2px' }}>
+                        {selectedInstDetails.category} • {selectedInstDetails.state} State • Domain: @{selectedInstDetails.domain}
+                      </div>
+                    </div>
+                    <span style={{ backgroundColor: '#dcfce7', color: '#166534', border: '1px solid #86efac', fontSize: '0.7rem', fontWeight: 700, padding: '2px 8px', borderRadius: '4px' }}>
+                      Accredited
+                    </span>
+                  </div>
+                )}
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              {/* SECTION 2: Verified Institution Parameters */}
+              <div style={{ marginBottom: '16px' }}>
+                <h4 style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: '12px', color: '#0f172a' }}>
+                  2. Institution Verification Details
+                </h4>
+
                 <div className="input-group">
-                  <label>Institutional Code *</label>
+                  <label>Institution Full Name *</label>
                   <input
                     type="text"
                     required
                     className="input-field"
-                    placeholder="e.g. OAU"
-                    value={onboardForm.code}
-                    onChange={(e) => setOnboardForm({ ...onboardForm, code: e.target.value })}
+                    placeholder="e.g. Obafemi Awolowo University"
+                    value={onboardForm.name}
+                    onChange={(e) => setOnboardForm({ ...onboardForm, name: e.target.value })}
                   />
                 </div>
-                <div className="input-group">
-                  <label>State / Location</label>
-                  <input
-                    type="text"
-                    className="input-field"
-                    placeholder="e.g. Osun"
-                    value={onboardForm.state}
-                    onChange={(e) => setOnboardForm({ ...onboardForm, state: e.target.value })}
-                  />
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div className="input-group">
+                    <label>Institutional Code *</label>
+                    <input
+                      type="text"
+                      required
+                      className="input-field"
+                      placeholder="e.g. OAU"
+                      value={onboardForm.code}
+                      onChange={(e) => setOnboardForm({ ...onboardForm, code: e.target.value.toUpperCase() })}
+                    />
+                  </div>
+                  <div className="input-group">
+                    <label>State / Region</label>
+                    <input
+                      type="text"
+                      className="input-field"
+                      placeholder="e.g. Osun"
+                      value={onboardForm.state}
+                      onChange={(e) => setOnboardForm({ ...onboardForm, state: e.target.value })}
+                    />
+                  </div>
                 </div>
               </div>
 
+              {/* SECTION 3: Coordinator Provisioning */}
               <div style={{ borderTop: '1px solid var(--border-subtle)', margin: '16px 0', paddingTop: '16px' }}>
-                <h4 style={{ fontSize: '0.95rem', marginBottom: '12px' }}>Designated SIWES Coordinator Account</h4>
+                <h4 style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: '12px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Users size={16} /> 3. Designated SIWES Coordinator Account
+                </h4>
 
                 <div className="input-group">
                   <label>Coordinator Full Name *</label>
@@ -754,12 +1003,19 @@ const ItfDashboard = () => {
                 </div>
 
                 <div className="input-group">
-                  <label>Coordinator Official Email *</label>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <label>Coordinator Official Email *</label>
+                    {selectedInstDetails?.domain && (
+                      <span style={{ fontSize: '0.74rem', color: '#059669', fontWeight: 600 }}>
+                        Domain: @{selectedInstDetails.domain}
+                      </span>
+                    )}
+                  </div>
                   <input
                     type="email"
                     required
                     className="input-field"
-                    placeholder="e.g. coordinator@oau.edu.ng"
+                    placeholder={selectedInstDetails ? `coordinator@${selectedInstDetails.domain}` : "e.g. coordinator@oau.edu.ng"}
                     value={onboardForm.coordinator_email}
                     onChange={(e) => setOnboardForm({ ...onboardForm, coordinator_email: e.target.value })}
                   />
@@ -782,7 +1038,7 @@ const ItfDashboard = () => {
                   type="button"
                   className="btn-secondary"
                   style={{ flex: 1 }}
-                  onClick={() => setShowOnboardModal(false)}
+                  onClick={() => { setShowOnboardModal(false); resetOnboardForm(); }}
                 >
                   Cancel
                 </button>
@@ -792,7 +1048,7 @@ const ItfDashboard = () => {
                   style={{ flex: 1 }}
                   disabled={onboardingLoading}
                 >
-                  {onboardingLoading ? 'Onboarding...' : 'Accredit & Create'}
+                  {onboardingLoading ? 'Accrediting...' : 'Accredit & Provision'}
                 </button>
               </div>
             </form>

@@ -20,15 +20,16 @@ exports.getInstitutions = async (req, res, next) => {
 exports.onboardInstitution = async (req, res, next) => {
   try {
     const { name, code, state, coordinator_name, coordinator_email, password } = req.body;
+    const initialPassword = (password && password.trim()) ? password.trim() : 'password123';
 
-    if (!name || !code || !coordinator_name || !coordinator_email || !password) {
+    if (!name || !code || !coordinator_name || !coordinator_email) {
       return res.status(400).json({
         success: false,
-        message: 'Institution name, code, coordinator name, email, and an initial password are all required'
+        message: 'Institution name, code, coordinator name, and email are required'
       });
     }
 
-    if (password.length < 8) {
+    if (initialPassword.length < 8) {
       return res.status(400).json({ success: false, message: 'Coordinator password must be at least 8 characters' });
     }
 
@@ -53,7 +54,7 @@ exports.onboardInstitution = async (req, res, next) => {
     }
 
     const salt = await bcrypt.genSalt(10);
-    const password_hash = await bcrypt.hash(password, salt);
+    const password_hash = await bcrypt.hash(initialPassword, salt);
 
     // Create institution and coordinator in transaction
     const [newInstitution, newCoordinator] = await prisma.$transaction([

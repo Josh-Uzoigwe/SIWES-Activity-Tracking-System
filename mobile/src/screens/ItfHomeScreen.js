@@ -18,6 +18,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { AuthContext } from '../context/AuthContext';
 import api, { getFileUrl } from '../api/client';
 import StatusBadge from '../components/StatusBadge';
+import {
+  COUNTRIES,
+  NIGERIAN_STATES,
+  INSTITUTION_CATEGORIES,
+  ACCREDITED_INSTITUTIONS,
+} from '../data/nigerianInstitutions';
 
 const TABS = [
   { id: 'reports', label: 'Final Reports & Stipends' },
@@ -44,9 +50,25 @@ const ItfHomeScreen = ({ navigation }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedInstFilter, setSelectedInstFilter] = useState('ALL');
 
-  // Onboard Institution Modal
+  // Onboard Institution Modal with Cascading Directory Selection
   const [showOnboardModal, setShowOnboardModal] = useState(false);
   const [onboardingSubmitting, setOnboardingSubmitting] = useState(false);
+  const [selectedCountry, setSelectedCountry] = useState('Nigeria');
+  const [selectedState, setSelectedState] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedInstitution, setSelectedInstitution] = useState('');
+  const [isManualEntry, setIsManualEntry] = useState(false);
+
+  // Generic Picker Modal
+  const [pickerConfig, setPickerConfig] = useState({
+    visible: false,
+    title: '',
+    items: [],
+    searchable: false,
+    onSelect: null,
+  });
+  const [pickerSearch, setPickerSearch] = useState('');
+
   const [onboardForm, setOnboardForm] = useState({
     name: '',
     code: '',
@@ -55,6 +77,169 @@ const ItfHomeScreen = ({ navigation }) => {
     coordinator_email: '',
     password: '',
   });
+
+  const resetOnboardForm = () => {
+    setOnboardForm({
+      name: '',
+      code: '',
+      state: '',
+      coordinator_name: '',
+      coordinator_email: '',
+      password: '',
+    });
+    setSelectedCountry('Nigeria');
+    setSelectedState('');
+    setSelectedCategory('');
+    setSelectedInstitution('');
+    setIsManualEntry(false);
+  };
+
+  const filteredDirectoryInstitutions = ACCREDITED_INSTITUTIONS.filter((inst) => {
+    if (selectedState && inst.state !== selectedState) return false;
+    if (selectedCategory && inst.category !== selectedCategory) return false;
+    return true;
+  });
+
+  const selectedInstDetails = ACCREDITED_INSTITUTIONS.find((i) => i.name === selectedInstitution);
+
+  const handleStateChange = (stateName) => {
+    setSelectedState(stateName);
+    if (selectedInstitution && selectedInstitution !== 'CUSTOM') {
+      const found = ACCREDITED_INSTITUTIONS.find((i) => i.name === selectedInstitution);
+      if (found && stateName && found.state !== stateName) {
+        setSelectedInstitution('');
+        setOnboardForm((prev) => ({ ...prev, name: '', code: '', state: stateName }));
+      } else if (stateName) {
+        setOnboardForm((prev) => ({ ...prev, state: stateName }));
+      }
+    } else if (stateName) {
+      setOnboardForm((prev) => ({ ...prev, state: stateName }));
+    }
+  };
+
+  const handleCategoryChange = (categoryName) => {
+    setSelectedCategory(categoryName);
+    if (selectedInstitution && selectedInstitution !== 'CUSTOM') {
+      const found = ACCREDITED_INSTITUTIONS.find((i) => i.name === selectedInstitution);
+      if (found && categoryName && found.category !== categoryName) {
+        setSelectedInstitution('');
+        setOnboardForm((prev) => ({ ...prev, name: '', code: '' }));
+      }
+    }
+  };
+
+  const handleInstitutionSelect = (instName) => {
+    setSelectedInstitution(instName);
+    if (!instName) {
+      setOnboardForm((prev) => ({
+        ...prev,
+        name: '',
+        code: '',
+        state: selectedState || '',
+      }));
+      return;
+    }
+    if (instName === 'CUSTOM') {
+      setIsManualEntry(true);
+      setOnboardForm((prev) => ({
+        ...prev,
+        name: '',
+        code: '',
+        state: selectedState || '',
+      }));
+      return;
+    }
+
+    const found = ACCREDITED_INSTITUTIONS.find((i) => i.name === instName);
+    if (found) {
+      setIsManualEntry(false);
+      if (found.state && (!selectedState || selectedState !== found.state)) {
+        setSelectedState(found.state);
+      }
+      setOnboardForm((prev) => ({
+        ...prev,
+        name: found.name,
+        code: found.code,
+        state: found.state,
+        coordinator_email: (!prev.coordinator_email || prev.coordinator_email.includes('@'))
+          ? `coordinator@${found.domain}`
+          : prev.coordinator_email,
+      }));
+    }
+  };
+
+  const openCountryPicker = () => {
+    setPickerSearch('');
+    setPickerConfig({
+      visible: true,
+      title: 'Select Country',
+      searchable: false,
+      items: COUNTRIES.map((c) => ({ id: c, label: c, value: c })),
+      onSelect: (val) => {
+        setSelectedCountry(val);
+        if (val !== 'Nigeria') {
+          setIsManualEntry(true);
+          setSelectedInstitution('CUSTOM');
+          setOnboardForm((prev) => ({ ...prev, name: '', code: '', state: '' }));
+        } else {
+          setIsManualEntry(false);
+          setSelectedInstitution('');
+        }
+      },
+    });
+  };
+
+  const openStatePicker = () => {
+    setPickerSearch('');
+    setPickerConfig({
+      visible: true,
+      title: 'Select State (36 + FCT)',
+      searchable: true,
+      items: [
+        { id: 'ALL', label: 'All States (37)', value: '' },
+        ...NIGERIAN_STATES.map((s) => ({ id: s, label: s, value: s })),
+      ],
+      onSelect: (val) => handleStateChange(val),
+    });
+  };
+
+  const openCategoryPicker = () => {
+    setPickerSearch('');
+    setPickerConfig({
+      visible: true,
+      title: 'Select Institution Type',
+      searchable: false,
+      items: [
+        { id: 'ALL', label: 'All Categories', value: '' },
+        ...INSTITUTION_CATEGORIES.map((cat) => ({ id: cat, label: cat, value: cat })),
+      ],
+      onSelect: (val) => handleCategoryChange(val),
+    });
+  };
+
+  const openInstitutionPicker = () => {
+    setPickerSearch('');
+    setPickerConfig({
+      visible: true,
+      title: 'Select Accredited Institution',
+      searchable: true,
+      items: [
+        ...filteredDirectoryInstitutions.map((inst) => ({
+          id: `${inst.code}-${inst.name}`,
+          label: `${inst.name} (${inst.code})`,
+          subLabel: `${inst.category} • ${inst.state}`,
+          value: inst.name,
+        })),
+        {
+          id: 'CUSTOM',
+          label: '➕ Other / Unlisted Institution',
+          subLabel: 'Enter institutional details manually',
+          value: 'CUSTOM',
+        },
+      ],
+      onSelect: (val) => handleInstitutionSelect(val),
+    });
+  };
 
   const loadData = useCallback(async () => {
     try {
@@ -113,32 +298,29 @@ const ItfHomeScreen = ({ navigation }) => {
   // Onboard Institution + Coordinator
   const handleOnboardSubmit = async () => {
     const { name, code, state, coordinator_name, coordinator_email, password } = onboardForm;
-    if (!name.trim() || !code.trim() || !coordinator_name.trim() || !coordinator_email.trim() || !password.trim()) {
+    if (!name.trim() || !code.trim() || !coordinator_name.trim() || !coordinator_email.trim()) {
       Alert.alert('Required Fields', 'Please complete all required fields.');
       return;
     }
-    if (password.length < 8) {
+    const finalPassword = password && password.trim() ? password.trim() : 'password123';
+    if (finalPassword.length < 8) {
       Alert.alert('Weak Password', 'Coordinator password must be at least 8 characters long.');
       return;
     }
 
     setOnboardingSubmitting(true);
     try {
-      const res = await api.post('/institutions', onboardForm);
+      const res = await api.post('/institutions', {
+        ...onboardForm,
+        password: finalPassword,
+      });
       if (res.data?.success) {
         Alert.alert(
           'Accredited Successfully',
           `Accredited ${name} (${code.toUpperCase()}) and created Coordinator account for ${coordinator_name}.`
         );
         setShowOnboardModal(false);
-        setOnboardForm({
-          name: '',
-          code: '',
-          state: '',
-          coordinator_name: '',
-          coordinator_email: '',
-          password: '',
-        });
+        resetOnboardForm();
         loadData();
       }
     } catch (err) {
@@ -612,7 +794,7 @@ const ItfHomeScreen = ({ navigation }) => {
         )}
       </ScrollView>
 
-      {/* Onboard Institution Modal */}
+      {/* Onboard Institution Modal with Cascading Directory Selection */}
       <Modal visible={showOnboardModal} transparent animationType="slide">
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
@@ -621,12 +803,97 @@ const ItfHomeScreen = ({ navigation }) => {
                 <Text style={styles.modalTitle}>Onboard Tertiary Institution</Text>
                 <Text style={styles.modalSubtitle}>Accredit an institution and assign its SIWES Coordinator</Text>
               </View>
-              <TouchableOpacity onPress={() => setShowOnboardModal(false)}>
+              <TouchableOpacity onPress={() => { setShowOnboardModal(false); resetOnboardForm(); }}>
                 <Ionicons name="close" size={22} color="#64748b" />
               </TouchableOpacity>
             </View>
 
-            <ScrollView style={styles.modalForm}>
+            <ScrollView style={styles.modalForm} keyboardShouldPersistTaps="handled">
+              {/* Directory Filter Box */}
+              <View style={styles.directoryBox}>
+                <View style={styles.directoryHeader}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <Ionicons name="school-outline" size={16} color="#059669" />
+                    <Text style={styles.directoryTitle}>Accredited Directory Filter</Text>
+                  </View>
+                  <TouchableOpacity onPress={() => {
+                    setIsManualEntry(!isManualEntry);
+                    if (!isManualEntry) {
+                      setSelectedInstitution('CUSTOM');
+                    } else {
+                      setSelectedInstitution('');
+                    }
+                  }}>
+                    <Text style={styles.toggleManualText}>
+                      {isManualEntry ? '← Directory' : 'Manual Entry'}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+
+                {/* Country */}
+                <Text style={styles.pickerFieldLabel}>1. Country</Text>
+                <TouchableOpacity style={styles.selectorBtn} onPress={openCountryPicker}>
+                  <Text style={styles.selectorBtnText}>{selectedCountry}</Text>
+                  <Ionicons name="chevron-down" size={16} color="#64748b" />
+                </TouchableOpacity>
+
+                {selectedCountry === 'Nigeria' && (
+                  <>
+                    <View style={styles.rowInputs}>
+                      <View style={{ flex: 1, marginRight: 8 }}>
+                        <Text style={styles.pickerFieldLabel}>2. State</Text>
+                        <TouchableOpacity style={styles.selectorBtn} onPress={openStatePicker}>
+                          <Text style={styles.selectorBtnText} numberOfLines={1}>
+                            {selectedState || 'All States (37)'}
+                          </Text>
+                          <Ionicons name="chevron-down" size={16} color="#64748b" />
+                        </TouchableOpacity>
+                      </View>
+
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.pickerFieldLabel}>3. Type / Level</Text>
+                        <TouchableOpacity style={styles.selectorBtn} onPress={openCategoryPicker}>
+                          <Text style={styles.selectorBtnText} numberOfLines={1}>
+                            {selectedCategory || 'All Types'}
+                          </Text>
+                          <Ionicons name="chevron-down" size={16} color="#64748b" />
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+
+                    {!isManualEntry && (
+                      <View style={{ marginTop: 6 }}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <Text style={styles.pickerFieldLabel}>4. Accredited Institution</Text>
+                          <Text style={{ fontSize: 10, color: '#64748b' }}>
+                            {filteredDirectoryInstitutions.length} available
+                          </Text>
+                        </View>
+                        <TouchableOpacity style={[styles.selectorBtn, { height: 44 }]} onPress={openInstitutionPicker}>
+                          <Text style={[styles.selectorBtnText, !selectedInstitution && { color: '#94a3b8' }]} numberOfLines={1}>
+                            {selectedInstitution ? selectedInstitution : `-- Choose Institution (${filteredDirectoryInstitutions.length}) --`}
+                          </Text>
+                          <Ionicons name="chevron-down" size={16} color="#64748b" />
+                        </TouchableOpacity>
+                      </View>
+                    )}
+                  </>
+                )}
+
+                {selectedInstDetails && !isManualEntry && (
+                  <View style={styles.instBadgeCard}>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.instBadgeTitle}>{selectedInstDetails.name} ({selectedInstDetails.code})</Text>
+                      <Text style={styles.instBadgeMeta}>{selectedInstDetails.category} • {selectedInstDetails.state} • @{selectedInstDetails.domain}</Text>
+                    </View>
+                    <View style={styles.accreditedTag}>
+                      <Text style={styles.accreditedTagText}>Accredited</Text>
+                    </View>
+                  </View>
+                )}
+              </View>
+
+              <Text style={styles.modalSectionTitle}>Institution Parameters</Text>
               <Text style={styles.inputLabel}>Institution Full Name *</Text>
               <TextInput
                 style={styles.modalInput}
@@ -643,7 +910,7 @@ const ItfHomeScreen = ({ navigation }) => {
                     placeholder="e.g. OAU"
                     autoCapitalize="characters"
                     value={onboardForm.code}
-                    onChangeText={(t) => setOnboardForm({ ...onboardForm, code: t })}
+                    onChangeText={(t) => setOnboardForm({ ...onboardForm, code: t.toUpperCase() })}
                   />
                 </View>
                 <View style={{ flex: 1 }}>
@@ -668,10 +935,17 @@ const ItfHomeScreen = ({ navigation }) => {
                 onChangeText={(t) => setOnboardForm({ ...onboardForm, coordinator_name: t })}
               />
 
-              <Text style={styles.inputLabel}>Coordinator Email *</Text>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Text style={styles.inputLabel}>Coordinator Email *</Text>
+                {selectedInstDetails?.domain && (
+                  <Text style={{ fontSize: 10, color: '#059669', fontWeight: '600' }}>
+                    Domain: @{selectedInstDetails.domain}
+                  </Text>
+                )}
+              </View>
               <TextInput
                 style={styles.modalInput}
-                placeholder="coordinator@university.edu.ng"
+                placeholder={selectedInstDetails ? `coordinator@${selectedInstDetails.domain}` : "coordinator@university.edu.ng"}
                 autoCapitalize="none"
                 keyboardType="email-address"
                 value={onboardForm.coordinator_email}
@@ -691,7 +965,7 @@ const ItfHomeScreen = ({ navigation }) => {
             <View style={styles.modalActions}>
               <TouchableOpacity
                 style={styles.modalCancelBtn}
-                onPress={() => setShowOnboardModal(false)}
+                onPress={() => { setShowOnboardModal(false); resetOnboardForm(); }}
               >
                 <Text style={styles.modalCancelBtnText}>Cancel</Text>
               </TouchableOpacity>
@@ -707,6 +981,64 @@ const ItfHomeScreen = ({ navigation }) => {
                 )}
               </TouchableOpacity>
             </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Generic Item Picker Modal */}
+      <Modal
+        visible={pickerConfig.visible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setPickerConfig((p) => ({ ...p, visible: false }))}
+      >
+        <View style={styles.pickerModalOverlay}>
+          <View style={styles.pickerModalContent}>
+            <View style={styles.pickerModalHeader}>
+              <Text style={styles.pickerModalTitle}>{pickerConfig.title}</Text>
+              <TouchableOpacity onPress={() => setPickerConfig((p) => ({ ...p, visible: false }))}>
+                <Ionicons name="close" size={22} color="#64748b" />
+              </TouchableOpacity>
+            </View>
+
+            {pickerConfig.searchable && (
+              <View style={styles.pickerSearchBox}>
+                <Ionicons name="search" size={16} color="#94a3b8" style={{ marginRight: 6 }} />
+                <TextInput
+                  style={styles.pickerSearchInput}
+                  placeholder="Search options..."
+                  value={pickerSearch}
+                  onChangeText={setPickerSearch}
+                  autoCapitalize="none"
+                />
+              </View>
+            )}
+
+            <ScrollView style={{ maxHeight: 320 }} keyboardShouldPersistTaps="handled">
+              {pickerConfig.items
+                .filter(
+                  (it) =>
+                    !pickerSearch.trim() ||
+                    it.label.toLowerCase().includes(pickerSearch.toLowerCase()) ||
+                    (it.subLabel && it.subLabel.toLowerCase().includes(pickerSearch.toLowerCase()))
+                )
+                .map((it) => (
+                  <TouchableOpacity
+                    key={it.id}
+                    style={styles.pickerOptionItem}
+                    onPress={() => {
+                      if (pickerConfig.onSelect) pickerConfig.onSelect(it.value);
+                      setPickerConfig((p) => ({ ...p, visible: false }));
+                    }}
+                  >
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.pickerOptionLabel}>{it.label}</Text>
+                      {it.subLabel && <Text style={styles.pickerOptionSubLabel}>{it.subLabel}</Text>}
+                    </View>
+                    <Ionicons name="chevron-forward" size={16} color="#cbd5e1" />
+                  </TouchableOpacity>
+                ))}
+            </ScrollView>
           </View>
         </View>
       </Modal>
@@ -1300,6 +1632,146 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 13,
     fontWeight: '700',
+  },
+  directoryBox: {
+    backgroundColor: '#f1f5f9',
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 14,
+  },
+  directoryHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  directoryTitle: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#0f172a',
+  },
+  toggleManualText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#0284c7',
+    textDecorationLine: 'underline',
+  },
+  pickerFieldLabel: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#475569',
+    marginBottom: 3,
+    marginTop: 4,
+  },
+  selectorBtn: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#cbd5e1',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    height: 40,
+    marginBottom: 4,
+  },
+  selectorBtnText: {
+    fontSize: 13,
+    color: '#0f172a',
+    flex: 1,
+  },
+  instBadgeCard: {
+    backgroundColor: '#f0fdf4',
+    borderWidth: 1,
+    borderColor: '#bbf7d0',
+    borderRadius: 8,
+    padding: 8,
+    marginTop: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  instBadgeTitle: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#166534',
+  },
+  instBadgeMeta: {
+    fontSize: 10,
+    color: '#15803d',
+    marginTop: 2,
+  },
+  accreditedTag: {
+    backgroundColor: '#dcfce7',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  accreditedTagText: {
+    fontSize: 9,
+    fontWeight: '800',
+    color: '#166534',
+  },
+  pickerModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(15, 23, 42, 0.65)',
+    justifyContent: 'center',
+    padding: 20,
+  },
+  pickerModalContent: {
+    backgroundColor: '#ffffff',
+    borderRadius: 14,
+    padding: 16,
+    maxHeight: '80%',
+  },
+  pickerModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+    paddingBottom: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
+  },
+  pickerModalTitle: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#0f172a',
+  },
+  pickerSearchBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f8fafc',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    height: 38,
+    marginBottom: 10,
+  },
+  pickerSearchInput: {
+    flex: 1,
+    fontSize: 13,
+    color: '#0f172a',
+  },
+  pickerOptionItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f8fafc',
+  },
+  pickerOptionLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#0f172a',
+  },
+  pickerOptionSubLabel: {
+    fontSize: 11,
+    color: '#64748b',
+    marginTop: 2,
   },
 });
 
