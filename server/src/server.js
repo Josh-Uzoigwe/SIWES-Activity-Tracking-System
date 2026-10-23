@@ -19,27 +19,7 @@ const institutionRoutes = require('./routes/institution.routes');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(helmet());
-
-// General API rate limiter
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  limit: 100,
-  standardHeaders: 'draft-7',
-  legacyHeaders: false,
-});
-app.use('/api', limiter);
-
-// Stricter rate limiter for auth endpoints (brute-force protection)
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  limit: 15,
-  standardHeaders: 'draft-7',
-  legacyHeaders: false,
-  message: { success: false, message: 'Too many authentication attempts. Please try again later.' }
-});
-
-// Restrict CORS: Allow localhost/LAN origins in development
+// 1. CORS Middleware (Must run FIRST so all responses including errors/429 carry CORS headers)
 const isDev = process.env.NODE_ENV !== 'production';
 const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:5173')
   .split(',')
@@ -63,6 +43,28 @@ app.use(cors({
   },
   credentials: true
 }));
+
+app.use(helmet());
+
+// 2. General API rate limiter (relaxed in dev so local testing is never choked)
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: isDev ? 10000 : 300,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  skip: () => isDev,
+});
+app.use('/api', limiter);
+
+// 3. Stricter rate limiter for auth mutations (login/register brute-force protection)
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: isDev ? 1000 : 30,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  skip: (req) => isDev || req.method === 'GET',
+  message: { success: false, message: 'Too many authentication attempts. Please try again later.' }
+});
 
 // Limit JSON body size to prevent payload DoS
 app.use(express.json({ limit: '50kb' }));
