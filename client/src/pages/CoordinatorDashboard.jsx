@@ -15,7 +15,10 @@ import {
   XCircle,
   AlertCircle,
   Clock,
-  ShieldCheck
+  ShieldCheck,
+  Landmark,
+  MapPin,
+  Phone
 } from 'lucide-react';
 
 const CoordinatorDashboard = () => {
@@ -102,6 +105,9 @@ const CoordinatorDashboard = () => {
         address: existing.address || '',
         start_date: existing.start_date ? existing.start_date.split('T')[0] : '',
         end_date: existing.end_date ? existing.end_date.split('T')[0] : '',
+        industry_supervisor_name: existing.industry_supervisor_name || '',
+        industry_supervisor_email: existing.industry_supervisor_email || '',
+        industry_supervisor_phone: existing.industry_supervisor_phone || '',
         school_supervisor_id: existing.school_supervisor?.supervisor_id || '',
         industry_supervisor_id: existing.industry_supervisor?.supervisor_id || ''
       });
@@ -111,6 +117,9 @@ const CoordinatorDashboard = () => {
         address: '',
         start_date: '',
         end_date: '',
+        industry_supervisor_name: '',
+        industry_supervisor_email: '',
+        industry_supervisor_phone: '',
         school_supervisor_id: '',
         industry_supervisor_id: ''
       });
@@ -133,13 +142,15 @@ const CoordinatorDashboard = () => {
           company_name: placementForm.company_name,
           address: placementForm.address,
           start_date: placementForm.start_date,
-          end_date: placementForm.end_date
+          end_date: placementForm.end_date,
+          industry_supervisor_name: placementForm.industry_supervisor_name,
+          industry_supervisor_email: placementForm.industry_supervisor_email,
+          industry_supervisor_phone: placementForm.industry_supervisor_phone,
+          school_supervisor_id: placementForm.school_supervisor_id ? parseInt(placementForm.school_supervisor_id, 10) : undefined
         });
         placementId = createRes.data.data.placement_id;
-      }
-
-      // Assign supervisors if selected
-      if (placementForm.school_supervisor_id || placementForm.industry_supervisor_id) {
+      } else {
+        // Update placement with supervisor assignments
         await api.put(`/placements/${placementId}`, {
           school_supervisor_id: placementForm.school_supervisor_id ? parseInt(placementForm.school_supervisor_id, 10) : undefined,
           industry_supervisor_id: placementForm.industry_supervisor_id ? parseInt(placementForm.industry_supervisor_id, 10) : undefined
@@ -603,23 +614,38 @@ const CoordinatorDashboard = () => {
                         <td style={{ padding: '14px 18px' }}>
                           {placement ? (
                             <div>
-                              <div style={{ fontWeight: 500, color: 'var(--text-main)' }}>{placement.company_name}</div>
-                              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                                {placement.start_date ? new Date(placement.start_date).toLocaleDateString() : 'N/A'} - {placement.end_date ? new Date(placement.end_date).toLocaleDateString() : 'N/A'}
+                              <div style={{ fontWeight: 600, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <Building size={14} color="#0284c7" /> {placement.company_name}
+                              </div>
+                              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                                {placement.address}
+                              </div>
+                              <div style={{ fontSize: '0.725rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                                {placement.start_date ? new Date(placement.start_date).toLocaleDateString() : 'N/A'} – {placement.end_date ? new Date(placement.end_date).toLocaleDateString() : 'N/A'}
                               </div>
                             </div>
                           ) : (
-                            <span className="badge pending" style={{ fontSize: '0.7rem' }}>Unassigned</span>
+                            <span className="badge pending" style={{ fontSize: '0.7rem' }}>Awaiting Student Submission</span>
                           )}
                         </td>
                         <td style={{ padding: '14px 18px' }}>
                           {placement ? (
-                            <div style={{ fontSize: '0.775rem', display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                              <span><strong>School:</strong> {placement.school_supervisor?.full_name || 'Not assigned'}</span>
-                              <span><strong>Industry:</strong> {placement.industry_supervisor?.full_name || 'Not assigned'}</span>
+                            <div style={{ fontSize: '0.775rem', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                              <div>
+                                <span style={{ color: 'var(--text-muted)' }}>School: </span>
+                                {placement.school_supervisor?.full_name ? (
+                                  <strong style={{ color: '#15803d' }}>{placement.school_supervisor.full_name}</strong>
+                                ) : (
+                                  <span style={{ color: '#b45309', fontWeight: 600 }}>Pending Allocation</span>
+                                )}
+                              </div>
+                              <div>
+                                <span style={{ color: 'var(--text-muted)' }}>Industry: </span>
+                                <span>{placement.industry_supervisor_name || placement.industry_supervisor?.full_name || 'Not provided'}</span>
+                              </div>
                             </div>
                           ) : (
-                            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>No placement</span>
+                            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>No placement registered</span>
                           )}
                         </td>
                         <td style={{ padding: '14px 18px' }}>
@@ -642,11 +668,16 @@ const CoordinatorDashboard = () => {
                             )}
                             <button
                               type="button"
-                              className="btn-secondary"
-                              style={{ padding: '6px 12px', fontSize: '0.8rem' }}
+                              className={placement && !placement.school_supervisor ? 'btn-primary' : 'btn-secondary'}
+                              style={{ 
+                                padding: '6px 12px', 
+                                fontSize: '0.8rem',
+                                backgroundColor: placement && !placement.school_supervisor ? '#0284c7' : undefined,
+                                borderColor: placement && !placement.school_supervisor ? '#0284c7' : undefined
+                              }}
                               onClick={() => openPlacementModal(s)}
                             >
-                              {placement ? 'Edit Placement' : 'Assign Placement'}
+                              {placement ? (placement.school_supervisor ? 'Edit Allocation' : 'Assign School Supervisor') : 'Record Placement'}
                             </button>
                           </div>
                         </td>
@@ -779,6 +810,30 @@ const CoordinatorDashboard = () => {
                 <XCircle size={22} />
               </button>
             </div>
+
+            {selectedStudent.placements?.[0] ? (
+              <div style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', padding: '12px', marginBottom: '16px', fontSize: '0.825rem' }}>
+                <div style={{ fontWeight: 600, color: '#166534', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Building size={15} /> Student-Reported Place of Attachment
+                </div>
+                <div style={{ color: '#15803d', lineHeight: 1.5 }}>
+                  <div><strong>Host Firm:</strong> {selectedStudent.placements[0].company_name}</div>
+                  <div><strong>Location:</strong> {selectedStudent.placements[0].address}</div>
+                  {(selectedStudent.placements[0].industry_supervisor_name || selectedStudent.placements[0].industry_supervisor_phone) && (
+                    <div style={{ marginTop: '2px' }}>
+                      <strong>On-site Contact:</strong> {selectedStudent.placements[0].industry_supervisor_name || 'Reported'} 
+                      {selectedStudent.placements[0].industry_supervisor_phone && ` (${selectedStudent.placements[0].industry_supervisor_phone})`}
+                      {selectedStudent.placements[0].industry_supervisor_email && ` • ${selectedStudent.placements[0].industry_supervisor_email}`}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div style={{ backgroundColor: '#fffbeb', border: '1px solid #fde68a', borderRadius: '8px', padding: '12px', marginBottom: '16px', fontSize: '0.825rem', color: '#92400e' }}>
+                <AlertCircle size={15} style={{ display: 'inline', marginRight: '4px', verticalAlign: 'middle' }} />
+                Student has not submitted their place of attachment yet. You can input it on their behalf or allocate a school supervisor.
+              </div>
+            )}
 
             <form onSubmit={handleSavePlacement}>
               <div className="input-group">

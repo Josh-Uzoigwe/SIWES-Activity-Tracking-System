@@ -32,47 +32,106 @@ exports.getPlacementByStudentId = async (req, res, next) => {
 
 exports.createPlacement = async (req, res, next) => {
   try {
-    const { student_id, company_name, address, start_date, end_date } = req.body;
+    let targetStudentId;
+    const isStudent = req.user.role === 'STUDENT';
 
-    // Verify the student exists and belongs to the coordinator's institution
-    const student = await prisma.student.findUnique({
-      where: { student_id: parseInt(student_id, 10) }
-    });
-
-    if (!student) {
-      return res.status(404).json({ success: false, message: 'Student not found' });
-    }
-
-    const coordinator = await prisma.supervisor.findUnique({
-      where: { supervisor_id: req.user.id }
-    });
-
-    if (student.institution !== coordinator.institution) {
-      return res.status(403).json({ success: false, message: 'Cannot create placement for a student outside your institution' });
-    }
-
-    // Check if placement already exists
-    const existingPlacement = await prisma.placement.findFirst({
-      where: { student_id: parseInt(student_id, 10) }
-    });
-
-    if (existingPlacement) {
-      return res.status(400).json({ success: false, message: 'Student already has a placement' });
-    }
-
-    const placement = await prisma.placement.create({
-      data: {
-        student_id: parseInt(student_id, 10),
-        company_name,
-        address,
-        start_date: new Date(start_date),
-        end_date: new Date(end_date)
+    if (isStudent) {
+      targetStudentId = req.user.id;
+    } else if (req.user.role === 'COORDINATOR') {
+      const { student_id } = req.body;
+      if (!student_id) {
+        return res.status(400).json({ success: false, message: 'student_id is required' });
       }
+      targetStudentId = parseInt(student_id, 10);
+
+      const student = await prisma.student.findUnique({
+        where: { student_id: targetStudentId }
+      });
+      if (!student) {
+        return res.status(404).json({ success: false, message: 'Student not found' });
+      }
+
+      const coordinator = await prisma.supervisor.findUnique({
+        where: { supervisor_id: req.user.id }
+      });
+      if (student.institution !== coordinator.institution) {
+        return res.status(403).json({ success: false, message: 'Cannot manage placement for a student outside your institution' });
+      }
+    } else {
+      return res.status(403).json({ success: false, message: 'Only students and coordinators can register placements' });
+    }
+
+    const {
+      company_name,
+      address,
+      start_date,
+      end_date,
+      industry_supervisor_name,
+      industry_supervisor_email,
+      industry_supervisor_phone,
+      school_supervisor_id,
+      industry_supervisor_id
+    } = req.body;
+
+    if (!company_name || !address || !start_date || !end_date) {
+      return res.status(400).json({
+        success: false,
+        message: 'Company name, address, start date, and end date are required'
+      });
+    }
+
+    // Check if student already has a placement — update if exists (upsert)
+    const existingPlacement = await prisma.placement.findFirst({
+      where: { student_id: targetStudentId }
     });
 
-    res.status(201).json({
+    let placement;
+    if (existingPlacement) {
+      const updateData = {
+        company_name: company_name.trim(),
+        address: address.trim(),
+        start_date: new Date(start_date),
+        end_date: new Date(end_date),
+      };
+
+      if (industry_supervisor_name !== undefined) updateData.industry_supervisor_name = industry_supervisor_name ? industry_supervisor_name.trim() : null;
+      if (industry_supervisor_email !== undefined) updateData.industry_supervisor_email = industry_supervisor_email ? industry_supervisor_email.trim() : null;
+      if (industry_supervisor_phone !== undefined) updateData.industry_supervisor_phone = industry_supervisor_phone ? industry_supervisor_phone.trim() : null;
+      if (!isStudent && school_supervisor_id !== undefined) updateData.school_supervisor_id = school_supervisor_id ? parseInt(school_supervisor_id, 10) : null;
+      if (!isStudent && industry_supervisor_id !== undefined) updateData.industry_supervisor_id = industry_supervisor_id ? parseInt(industry_supervisor_id, 10) : null;
+
+      placement = await prisma.placement.update({
+        where: { placement_id: existingPlacement.placement_id },
+        data: updateData,
+        include: {
+          school_supervisor: { select: { supervisor_id: true, full_name: true, email: true, department: true } },
+          industry_supervisor: { select: { supervisor_id: true, full_name: true, email: true, company: true } }
+        }
+      });
+    } else {
+      placement = await prisma.placement.create({
+        data: {
+          student_id: targetStudentId,
+          company_name: company_name.trim(),
+          address: address.trim(),
+          start_date: new Date(start_date),
+          end_date: new Date(end_date),
+          industry_supervisor_name: industry_supervisor_name ? industry_supervisor_name.trim() : null,
+          industry_supervisor_email: industry_supervisor_email ? industry_supervisor_email.trim() : null,
+          industry_supervisor_phone: industry_supervisor_phone ? industry_supervisor_phone.trim() : null,
+          ...(!isStudent && school_supervisor_id ? { school_supervisor_id: parseInt(school_supervisor_id, 10) } : {}),
+          ...(!isStudent && industry_supervisor_id ? { industry_supervisor_id: parseInt(industry_supervisor_id, 10) } : {})
+        },
+        include: {
+          school_supervisor: { select: { supervisor_id: true, full_name: true, email: true, department: true } },
+          industry_supervisor: { select: { supervisor_id: true, full_name: true, email: true, company: true } }
+        }
+      });
+    }
+
+    res.status(existingPlacement ? 200 : 201).json({
       success: true,
-      message: 'Placement created successfully',
+      message: existingPlacement ? 'Place of attachment updated successfully' : 'Place of attachment registered successfully',
       data: placement
     });
   } catch (error) {

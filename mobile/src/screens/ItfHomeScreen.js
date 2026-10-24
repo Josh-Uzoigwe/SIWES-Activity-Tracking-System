@@ -437,6 +437,23 @@ const ItfHomeScreen = ({ navigation }) => {
                 <Text style={styles.infoText}>Submitted: {submittedDate}</Text>
               </View>
 
+              {/* Verified Stipend Bank Details */}
+              <View style={{ backgroundColor: '#f0fdf4', padding: 8, borderRadius: 6, marginVertical: 6, borderWidth: 1, borderColor: '#bbf7d0', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontSize: 10, color: '#166534', fontWeight: '700' }}>
+                    {report.student?.bank_name || 'Commercial Bank Pending'}
+                  </Text>
+                  <Text style={{ fontSize: 12, fontWeight: '800', color: '#0f172a', letterSpacing: 1 }}>
+                    {report.student?.account_number || 'NUBAN Not Provided'}
+                  </Text>
+                </View>
+                {report.student?.account_name ? (
+                  <Text style={{ fontSize: 10, color: '#475569', maxWidth: '48%', textAlign: 'right' }} numberOfLines={1}>
+                    {report.student.account_name}
+                  </Text>
+                ) : null}
+              </View>
+
               {report.file_url ? (
                 <TouchableOpacity
                   style={styles.fileButton}
@@ -510,6 +527,14 @@ const ItfHomeScreen = ({ navigation }) => {
 
               <Text style={styles.instLine}>{s.institution}</Text>
               <Text style={styles.deptLine}>{s.department} • {s.year_of_study}</Text>
+              {s.account_number ? (
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 }}>
+                  <Ionicons name="card-outline" size={11} color="#15803d" />
+                  <Text style={{ fontSize: 11, color: '#15803d', fontWeight: '600' }}>
+                    {s.bank_name} • {s.account_number}
+                  </Text>
+                </View>
+              ) : null}
 
               <View style={styles.divider} />
 

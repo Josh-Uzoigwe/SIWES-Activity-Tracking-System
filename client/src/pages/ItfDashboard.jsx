@@ -737,6 +737,15 @@ const ItfDashboard = () => {
                       <td style={{ padding: '14px 18px' }}>
                         <div style={{ fontWeight: 600, color: 'var(--text-main)' }}>{report.student?.full_name}</div>
                         <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{report.student?.matric_no}</div>
+                        {report.student?.bank_name ? (
+                          <div style={{ fontSize: '0.725rem', color: '#15803d', marginTop: '3px', fontWeight: 500 }}>
+                            💳 {report.student.bank_name} • {report.student.account_number}
+                          </div>
+                        ) : (
+                          <div style={{ fontSize: '0.725rem', color: '#b45309', marginTop: '3px' }}>
+                            ⚠️ Bank details pending
+                          </div>
+                        )}
                       </td>
                       <td style={{ padding: '14px 18px', color: 'var(--text-main)' }}>
                         {report.student?.institution || 'N/A'}

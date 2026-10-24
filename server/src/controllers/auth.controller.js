@@ -265,7 +265,19 @@ exports.getMe = async (req, res, next) => {
     if (req.user.type === 'student') {
       userProfile = await prisma.student.findUnique({
         where: { student_id: req.user.id },
-        select: { student_id: true, matric_no: true, full_name: true, email: true, department: true, institution: true, year_of_study: true, status: true }
+        select: {
+          student_id: true,
+          matric_no: true,
+          full_name: true,
+          email: true,
+          department: true,
+          institution: true,
+          year_of_study: true,
+          status: true,
+          bank_name: true,
+          account_number: true,
+          account_name: true
+        }
       });
     } else {
       userProfile = await prisma.supervisor.findUnique({

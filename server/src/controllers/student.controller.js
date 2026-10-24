@@ -50,8 +50,11 @@ exports.getStudents = async (req, res, next) => {
         institution: true,
         year_of_study: true,
         status: true,
+        bank_name: true,
+        account_number: true,
+        account_name: true,
         created_at: true,
-        // Include minimal placement info
+        // Include placement info with industry supervisor details
         placements: {
           select: {
             placement_id: true,
@@ -59,6 +62,9 @@ exports.getStudents = async (req, res, next) => {
             address: true,
             start_date: true,
             end_date: true,
+            industry_supervisor_name: true,
+            industry_supervisor_email: true,
+            industry_supervisor_phone: true,
             school_supervisor: {
               select: { supervisor_id: true, full_name: true, email: true }
             },
@@ -238,3 +244,51 @@ exports.rejectStudent = async (req, res, next) => {
     next(err);
   }
 };
+
+// Student updates their official commercial bank account details for ITF stipend disbursement
+exports.updateBankDetails = async (req, res, next) => {
+  try {
+    const { bank_name, account_number, account_name } = req.body;
+    const student_id = req.user.id;
+
+    if (!bank_name || !account_number || !account_name) {
+      return res.status(400).json({
+        success: false,
+        message: 'Bank name, 10-digit account number, and account name are required'
+      });
+    }
+
+    const cleanAccNo = String(account_number).trim();
+    if (!/^\d{10}$/.test(cleanAccNo)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Account number must be exactly 10 digits (NUBAN)'
+      });
+    }
+
+    const updated = await prisma.student.update({
+      where: { student_id },
+      data: {
+        bank_name: bank_name.trim(),
+        account_number: cleanAccNo,
+        account_name: account_name.trim()
+      },
+      select: {
+        student_id: true,
+        full_name: true,
+        bank_name: true,
+        account_number: true,
+        account_name: true
+      }
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Official bank details updated successfully for ITF stipend disbursement',
+      data: updated
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+

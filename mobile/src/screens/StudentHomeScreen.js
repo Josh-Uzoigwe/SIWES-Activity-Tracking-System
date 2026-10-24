@@ -19,6 +19,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { AuthContext } from '../context/AuthContext';
 import api, { getFileUrl, uploadFinalReport } from '../api/client';
 import StatusBadge from '../components/StatusBadge';
+import { OFFICIAL_NIGERIAN_BANKS } from '../data/nigerianBanks';
 
 const TABS = [
   { id: 'logs', label: 'Daily Logbook' },
@@ -40,6 +41,30 @@ const StudentHomeScreen = ({ navigation }) => {
   const [showReportModal, setShowReportModal] = useState(false);
   const [submittingReport, setSubmittingReport] = useState(false);
 
+  // Bank Details State
+  const [showBankModal, setShowBankModal] = useState(false);
+  const [showBankPicker, setShowBankPicker] = useState(false);
+  const [bankSearch, setBankSearch] = useState('');
+  const [bankForm, setBankForm] = useState({
+    bank_name: '',
+    account_number: '',
+    account_name: '',
+  });
+  const [submittingBank, setSubmittingBank] = useState(false);
+
+  // Placement Registration State
+  const [showPlacementModal, setShowPlacementModal] = useState(false);
+  const [placementForm, setPlacementForm] = useState({
+    company_name: '',
+    address: '',
+    start_date: '',
+    end_date: '',
+    industry_supervisor_name: '',
+    industry_supervisor_email: '',
+    industry_supervisor_phone: '',
+  });
+  const [submittingPlacement, setSubmittingPlacement] = useState(false);
+
   const loadData = useCallback(async () => {
     try {
       const [logsRes, reportRes, placementRes, meRes] = await Promise.all([
@@ -51,8 +76,30 @@ const StudentHomeScreen = ({ navigation }) => {
 
       if (logsRes.data?.success) setLogs(logsRes.data.data || []);
       if (reportRes.data?.success) setFinalReport(reportRes.data.data);
-      if (placementRes.data?.success) setPlacement(placementRes.data.data);
-      if (meRes.data?.success) setStudentProfile(meRes.data.data);
+      if (placementRes.data?.success && placementRes.data.data) {
+        const pl = placementRes.data.data;
+        setPlacement(pl);
+        setPlacementForm({
+          company_name: pl.company_name || '',
+          address: pl.address || '',
+          start_date: pl.start_date ? pl.start_date.split('T')[0] : '',
+          end_date: pl.end_date ? pl.end_date.split('T')[0] : '',
+          industry_supervisor_name: pl.industry_supervisor_name || '',
+          industry_supervisor_email: pl.industry_supervisor_email || '',
+          industry_supervisor_phone: pl.industry_supervisor_phone || '',
+        });
+      }
+      if (meRes.data?.success && meRes.data.data) {
+        const prof = meRes.data.data;
+        setStudentProfile(prof);
+        if (prof.bank_name || prof.account_number || prof.account_name) {
+          setBankForm({
+            bank_name: prof.bank_name || '',
+            account_number: prof.account_number || '',
+            account_name: prof.account_name || '',
+          });
+        }
+      }
     } catch (err) {
       console.warn('Failed to fetch student data', err);
     } finally {
@@ -111,6 +158,61 @@ const StudentHomeScreen = ({ navigation }) => {
     }
   };
 
+  // Save Official Commercial Bank Details
+  const handleSaveBankDetails = async () => {
+    if (!bankForm.bank_name) {
+      Alert.alert('Bank Required', 'Please select your official commercial bank from the list.');
+      return;
+    }
+    if (!/^\d{10}$/.test(bankForm.account_number)) {
+      Alert.alert('Invalid Account', 'Please enter a valid 10-digit NUBAN account number.');
+      return;
+    }
+    if (!bankForm.account_name.trim()) {
+      Alert.alert('Account Name Required', 'Please enter your account name as registered with your bank.');
+      return;
+    }
+
+    setSubmittingBank(true);
+    try {
+      const res = await api.put('/students/bank-details', bankForm);
+      if (res.data?.success) {
+        Alert.alert('Bank Details Saved', 'Official bank details registered for federal ITF stipend disbursement.');
+        setShowBankModal(false);
+        loadData();
+      }
+    } catch (err) {
+      Alert.alert('Save Failed', err.response?.data?.message || 'Failed to update bank details.');
+    } finally {
+      setSubmittingBank(false);
+    }
+  };
+
+  // Self-Register / Update Place of Attachment
+  const handleSavePlacement = async () => {
+    if (!placementForm.company_name.trim() || !placementForm.address.trim()) {
+      Alert.alert('Required Fields', 'Please enter host organization name and workplace address.');
+      return;
+    }
+
+    setSubmittingPlacement(true);
+    try {
+      const res = await api.post('/placements', {
+        ...placementForm,
+        student_id: user.student_id || user.id,
+      });
+      if (res.data?.success) {
+        Alert.alert('Attachment Saved', 'Place of attachment registered. Your institution coordinator will allocate your school supervisor.');
+        setShowPlacementModal(false);
+        loadData();
+      }
+    } catch (err) {
+      Alert.alert('Save Failed', err.response?.data?.message || 'Failed to save place of attachment.');
+    } finally {
+      setSubmittingPlacement(false);
+    }
+  };
+
   const approvedCount = logs.filter((l) => (l.status || '').toLowerCase() === 'approved').length;
   const pendingCount = logs.filter((l) => (l.status || '').toLowerCase() === 'pending').length;
   const isCleared = studentProfile?.status === 'cleared' || user?.status === 'cleared';
@@ -119,6 +221,10 @@ const StudentHomeScreen = ({ navigation }) => {
     if (statusFilter === 'all') return true;
     return (l.status || '').toLowerCase() === statusFilter;
   });
+
+  const filteredBanks = OFFICIAL_NIGERIAN_BANKS.filter((b) =>
+    b.toLowerCase().includes(bankSearch.toLowerCase())
+  );
 
   return (
     <SafeAreaView style={styles.container}>
@@ -322,10 +428,55 @@ const StudentHomeScreen = ({ navigation }) => {
         {/* Tab 2: Placement & Final Report */}
         {activeTab === 'placement' && (
           <View style={styles.tabContent}>
-            {/* Host Company Card */}
+            {/* SIWES Stipend Account (ITF) Card */}
             <View style={styles.card}>
               <View style={styles.cardHeader}>
-                <Text style={styles.sectionCardTitle}>Workplace Placement</Text>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.sectionCardTitle}>SIWES Stipend Account</Text>
+                  <Text style={{ fontSize: 11, color: '#64748b' }}>Federal Industrial Training Fund (ITF) Direct Disbursement</Text>
+                </View>
+                <Ionicons name="card-outline" size={20} color="#15803d" />
+              </View>
+
+              {studentProfile?.account_number ? (
+                <View style={{ backgroundColor: '#f0fdf4', padding: 12, borderRadius: 8, borderWidth: 1, borderColor: '#bbf7d0', marginVertical: 8 }}>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Text style={{ fontSize: 13, fontWeight: '700', color: '#166534' }}>{studentProfile.bank_name}</Text>
+                    <View style={{ backgroundColor: '#dcfce7', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 }}>
+                      <Text style={{ fontSize: 10, fontWeight: '700', color: '#15803d' }}>Verified Commercial Bank</Text>
+                    </View>
+                  </View>
+                  <Text style={{ fontSize: 16, fontWeight: '800', color: '#0f172a', letterSpacing: 1.5, marginTop: 4 }}>
+                    {studentProfile.account_number}
+                  </Text>
+                  <Text style={{ fontSize: 12, color: '#475569', marginTop: 2 }}>{studentProfile.account_name}</Text>
+                </View>
+              ) : (
+                <View style={{ backgroundColor: '#fffbeb', padding: 12, borderRadius: 8, borderWidth: 1, borderColor: '#fef3c7', marginVertical: 8 }}>
+                  <Text style={{ fontSize: 12, color: '#92400e', lineHeight: 18 }}>
+                    Official commercial bank account details required to receive federal SIWES allowances directly from the Industrial Training Fund.
+                  </Text>
+                </View>
+              )}
+
+              <TouchableOpacity
+                style={[styles.outlineBtn, { marginTop: 4 }]}
+                onPress={() => setShowBankModal(true)}
+              >
+                <Ionicons name="card-outline" size={15} color="#0f172a" />
+                <Text style={styles.outlineBtnText}>
+                  {studentProfile?.account_number ? 'Update Bank Account Details' : 'Provide Bank Account Details'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Host Company / Attachment Card */}
+            <View style={styles.card}>
+              <View style={styles.cardHeader}>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.sectionCardTitle}>Place of Attachment</Text>
+                  <Text style={{ fontSize: 11, color: '#64748b' }}>SIWES Form 8 Attachment Information</Text>
+                </View>
                 <Ionicons name="business" size={18} color="#0f172a" />
               </View>
 
@@ -348,10 +499,40 @@ const StudentHomeScreen = ({ navigation }) => {
                       </Text>
                     </View>
                   </View>
+
+                  {placement.industry_supervisor_name ? (
+                    <View style={{ marginTop: 10, padding: 10, backgroundColor: '#f8fafc', borderRadius: 8, borderWidth: 1, borderColor: '#e2e8f0' }}>
+                      <Text style={{ fontSize: 10, fontWeight: '700', color: '#64748b', textTransform: 'uppercase' }}>
+                        Industry Supervisor (Workplace Trainer):
+                      </Text>
+                      <Text style={{ fontSize: 13, fontWeight: '700', color: '#0f172a', marginTop: 2 }}>
+                        {placement.industry_supervisor_name}
+                      </Text>
+                      {(placement.industry_supervisor_phone || placement.industry_supervisor_email) && (
+                        <Text style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>
+                          {[placement.industry_supervisor_phone, placement.industry_supervisor_email].filter(Boolean).join(' • ')}
+                        </Text>
+                      )}
+                    </View>
+                  ) : null}
                 </>
               ) : (
-                <Text style={styles.emptyHintText}>No company placement assigned yet by your coordinator.</Text>
+                <View style={{ marginVertical: 8 }}>
+                  <Text style={styles.emptyHintText}>
+                    You have not registered your place of attachment yet. Submit your host firm details so your coordinator can allocate your institutional supervisor.
+                  </Text>
+                </View>
               )}
+
+              <TouchableOpacity
+                style={[styles.outlineBtn, { marginTop: 10 }]}
+                onPress={() => setShowPlacementModal(true)}
+              >
+                <Ionicons name="create-outline" size={15} color="#0f172a" />
+                <Text style={styles.outlineBtnText}>
+                  {placement ? 'Update Place of Attachment' : 'Register Place of Attachment'}
+                </Text>
+              </TouchableOpacity>
             </View>
 
             {/* Supervisors Contacts */}
@@ -364,10 +545,10 @@ const StudentHomeScreen = ({ navigation }) => {
               <View style={styles.supItem}>
                 <Text style={styles.supRoleLabel}>Faculty Academic Supervisor:</Text>
                 <Text style={styles.supName}>
-                  {placement?.school_supervisor?.full_name || 'Assigned by Department'}
+                  {placement?.school_supervisor?.full_name || 'Allocated by Department Coordinator'}
                 </Text>
                 <Text style={styles.supEmail}>
-                  {placement?.school_supervisor?.email || 'Contact through department coordinator'}
+                  {placement?.school_supervisor?.email || 'Will be assigned once attachment is registered'}
                 </Text>
               </View>
 
@@ -376,10 +557,10 @@ const StudentHomeScreen = ({ navigation }) => {
               <View style={styles.supItem}>
                 <Text style={styles.supRoleLabel}>Workplace Industry Supervisor:</Text>
                 <Text style={styles.supName}>
-                  {placement?.industry_supervisor?.full_name || 'Designated Workplace Trainer'}
+                  {placement?.industry_supervisor_name || placement?.industry_supervisor?.full_name || 'Designated Workplace Trainer'}
                 </Text>
                 <Text style={styles.supEmail}>
-                  {placement?.industry_supervisor?.email || 'Contact at attachment premises'}
+                  {placement?.industry_supervisor_email || placement?.industry_supervisor?.email || 'Reported on place of attachment form'}
                 </Text>
               </View>
             </View>
@@ -477,6 +658,268 @@ const StudentHomeScreen = ({ navigation }) => {
             <View style={styles.modalActions}>
               <TouchableOpacity style={styles.modalCancelBtn} onPress={() => setShowReportModal(false)}>
                 <Text style={styles.modalCancelBtnText}>Close</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Official Bank Details Modal */}
+      <Modal visible={showBankModal} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.modalTitle}>SIWES Stipend Account Details</Text>
+                <Text style={{ fontSize: 11, color: '#64748b' }}>Federal Industrial Training Fund (ITF)</Text>
+              </View>
+              <TouchableOpacity onPress={() => setShowBankModal(false)}>
+                <Ionicons name="close" size={22} color="#64748b" />
+              </TouchableOpacity>
+            </View>
+
+            <View style={{ backgroundColor: '#f0fdf4', borderLeftWidth: 3, borderLeftColor: '#15803d', padding: 10, borderRadius: 6, marginVertical: 8 }}>
+              <Text style={{ fontSize: 11, color: '#166534', lineHeight: 16 }}>
+                <Text style={{ fontWeight: '700' }}>Official Commercial Banks Only: </Text>
+                ITF disburses allowances strictly to verified Nigerian commercial bank accounts.
+              </Text>
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Official Commercial Bank *</Text>
+              <TouchableOpacity
+                style={styles.selectBox}
+                onPress={() => {
+                  setBankSearch('');
+                  setShowBankPicker(true);
+                }}
+              >
+                <Text style={[styles.selectBoxText, !bankForm.bank_name && styles.placeholderText]}>
+                  {bankForm.bank_name || `-- Select Bank (${OFFICIAL_NIGERIAN_BANKS.length} Licensed) --`}
+                </Text>
+                <Ionicons name="chevron-down" size={16} color="#64748b" />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>10-Digit NUBAN Account Number *</Text>
+              <TextInput
+                style={[styles.textInput, { letterSpacing: 1.5, fontFamily: 'monospace' }]}
+                keyboardType="numeric"
+                maxLength={10}
+                placeholder="e.g. 0123456789"
+                placeholderTextColor="#94a3b8"
+                value={bankForm.account_number}
+                onChangeText={(val) => {
+                  const cleaned = val.replace(/\D/g, '').slice(0, 10);
+                  setBankForm({ ...bankForm, account_number: cleaned });
+                }}
+              />
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Account Full Name (as on bank record) *</Text>
+              <TextInput
+                style={styles.textInput}
+                autoCapitalize="characters"
+                placeholder="e.g. JOHN CHUKWUEMEKA DOE"
+                placeholderTextColor="#94a3b8"
+                value={bankForm.account_name}
+                onChangeText={(val) => setBankForm({ ...bankForm, account_name: val.toUpperCase() })}
+              />
+            </View>
+
+            <View style={[styles.modalActions, { marginTop: 16 }]}>
+              <TouchableOpacity
+                style={styles.modalCancelBtn}
+                onPress={() => setShowBankModal(false)}
+              >
+                <Text style={styles.modalCancelBtnText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modalSubmitBtn, (submittingBank || bankForm.account_number.length !== 10 || !bankForm.bank_name) && styles.disabledBtn]}
+                disabled={submittingBank || bankForm.account_number.length !== 10 || !bankForm.bank_name}
+                onPress={handleSaveBankDetails}
+              >
+                <Text style={styles.modalSubmitBtnText}>
+                  {submittingBank ? 'Saving...' : 'Save Bank Details'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Commercial Bank Picker Modal */}
+      <Modal visible={showBankPicker} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { maxHeight: '80%', paddingBottom: 10 }]}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Choose Commercial Bank</Text>
+              <TouchableOpacity onPress={() => setShowBankPicker(false)}>
+                <Ionicons name="close" size={22} color="#64748b" />
+              </TouchableOpacity>
+            </View>
+
+            <View style={{ marginBottom: 10 }}>
+              <TextInput
+                style={[styles.textInput, { fontSize: 13, paddingVertical: 7 }]}
+                placeholder="Search bank name..."
+                placeholderTextColor="#94a3b8"
+                value={bankSearch}
+                onChangeText={setBankSearch}
+                autoFocus
+              />
+            </View>
+
+            <ScrollView style={{ maxHeight: 350 }}>
+              {filteredBanks.map((b) => (
+                <TouchableOpacity
+                  key={b}
+                  style={[styles.bankItem, bankForm.bank_name === b && { backgroundColor: '#f0fdf4' }]}
+                  onPress={() => {
+                    setBankForm({ ...bankForm, bank_name: b });
+                    setShowBankPicker(false);
+                  }}
+                >
+                  <Text style={[styles.bankItemText, bankForm.bank_name === b && { fontWeight: '700', color: '#15803d' }]}>
+                    {b}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+              {filteredBanks.length === 0 && (
+                <Text style={{ textAlign: 'center', color: '#94a3b8', padding: 20 }}>No banks match "{bankSearch}"</Text>
+              )}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Place of Attachment Registration Modal */}
+      <Modal visible={showPlacementModal} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { maxHeight: '88%' }]}>
+            <View style={styles.modalHeader}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.modalTitle}>
+                  {placement ? 'Update Place of Attachment' : 'Register Place of Attachment'}
+                </Text>
+                <Text style={{ fontSize: 11, color: '#64748b' }}>SIWES Form 8 Attachment Information</Text>
+              </View>
+              <TouchableOpacity onPress={() => setShowPlacementModal(false)}>
+                <Ionicons name="close" size={22} color="#64748b" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 420 }}>
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Host Company / Organization Name *</Text>
+                <TextInput
+                  style={styles.textInput}
+                  placeholder="e.g. Chevron Nigeria Limited"
+                  placeholderTextColor="#94a3b8"
+                  value={placementForm.company_name}
+                  onChangeText={(val) => setPlacementForm({ ...placementForm, company_name: val })}
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Company Address / Physical Location *</Text>
+                <TextInput
+                  style={[styles.textInput, { minHeight: 60, textAlignVertical: 'top' }]}
+                  multiline
+                  placeholder="Street address, city, state..."
+                  placeholderTextColor="#94a3b8"
+                  value={placementForm.address}
+                  onChangeText={(val) => setPlacementForm({ ...placementForm, address: val })}
+                />
+              </View>
+
+              <View style={{ flexDirection: 'row', gap: 10 }}>
+                <View style={[styles.inputGroup, { flex: 1 }]}>
+                  <Text style={styles.inputLabel}>Start Date (YYYY-MM-DD)</Text>
+                  <TextInput
+                    style={styles.textInput}
+                    placeholder="2026-06-01"
+                    placeholderTextColor="#94a3b8"
+                    value={placementForm.start_date}
+                    onChangeText={(val) => setPlacementForm({ ...placementForm, start_date: val })}
+                  />
+                </View>
+                <View style={[styles.inputGroup, { flex: 1 }]}>
+                  <Text style={styles.inputLabel}>End Date (YYYY-MM-DD)</Text>
+                  <TextInput
+                    style={styles.textInput}
+                    placeholder="2026-11-30"
+                    placeholderTextColor="#94a3b8"
+                    value={placementForm.end_date}
+                    onChangeText={(val) => setPlacementForm({ ...placementForm, end_date: val })}
+                  />
+                </View>
+              </View>
+
+              <View style={{ marginTop: 6, marginBottom: 12, borderTopWidth: 1, borderTopColor: '#f1f5f9', paddingTop: 10 }}>
+                <Text style={{ fontSize: 12, fontWeight: '800', color: '#0f172a', marginBottom: 2 }}>
+                  Industry Supervisor (Workplace Trainer)
+                </Text>
+                <Text style={{ fontSize: 11, color: '#64748b', marginBottom: 8 }}>
+                  On-site supervisor who oversees and endorses your day-to-day training.
+                </Text>
+
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Supervisor Full Name</Text>
+                  <TextInput
+                    style={styles.textInput}
+                    placeholder="e.g. Engr. Tunde Adeleke"
+                    placeholderTextColor="#94a3b8"
+                    value={placementForm.industry_supervisor_name}
+                    onChangeText={(val) => setPlacementForm({ ...placementForm, industry_supervisor_name: val })}
+                  />
+                </View>
+
+                <View style={{ flexDirection: 'row', gap: 10 }}>
+                  <View style={[styles.inputGroup, { flex: 1 }]}>
+                    <Text style={styles.inputLabel}>Supervisor Email</Text>
+                    <TextInput
+                      style={styles.textInput}
+                      keyboardType="email-address"
+                      autoCapitalize="none"
+                      placeholder="supervisor@firm.com"
+                      placeholderTextColor="#94a3b8"
+                      value={placementForm.industry_supervisor_email}
+                      onChangeText={(val) => setPlacementForm({ ...placementForm, industry_supervisor_email: val })}
+                    />
+                  </View>
+                  <View style={[styles.inputGroup, { flex: 1 }]}>
+                    <Text style={styles.inputLabel}>Supervisor Phone</Text>
+                    <TextInput
+                      style={styles.textInput}
+                      keyboardType="phone-pad"
+                      placeholder="08031234567"
+                      placeholderTextColor="#94a3b8"
+                      value={placementForm.industry_supervisor_phone}
+                      onChangeText={(val) => setPlacementForm({ ...placementForm, industry_supervisor_phone: val })}
+                    />
+                  </View>
+                </View>
+              </View>
+            </ScrollView>
+
+            <View style={[styles.modalActions, { marginTop: 12 }]}>
+              <TouchableOpacity
+                style={styles.modalCancelBtn}
+                onPress={() => setShowPlacementModal(false)}
+              >
+                <Text style={styles.modalCancelBtnText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modalSubmitBtn, (submittingPlacement || !placementForm.company_name.trim() || !placementForm.address.trim()) && styles.disabledBtn]}
+                disabled={submittingPlacement || !placementForm.company_name.trim() || !placementForm.address.trim()}
+                onPress={handleSavePlacement}
+              >
+                <Text style={styles.modalSubmitBtnText}>
+                  {submittingPlacement ? 'Saving...' : placement ? 'Update Attachment' : 'Save Attachment'}
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -949,6 +1392,70 @@ const styles = StyleSheet.create({
   },
   disabledBtn: {
     opacity: 0.6,
+  },
+  outlineBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#cbd5e1',
+    backgroundColor: '#ffffff',
+  },
+  outlineBtnText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#0f172a',
+  },
+  inputGroup: {
+    marginBottom: 12,
+  },
+  inputLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#334155',
+    marginBottom: 4,
+  },
+  textInput: {
+    borderWidth: 1,
+    borderColor: '#cbd5e1',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 9,
+    fontSize: 14,
+    color: '#0f172a',
+    backgroundColor: '#ffffff',
+  },
+  selectBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderWidth: 1,
+    borderColor: '#cbd5e1',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 11,
+    backgroundColor: '#ffffff',
+  },
+  selectBoxText: {
+    fontSize: 13,
+    color: '#0f172a',
+  },
+  placeholderText: {
+    color: '#94a3b8',
+  },
+  bankItem: {
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
+  },
+  bankItemText: {
+    fontSize: 13,
+    color: '#0f172a',
   },
 });
 

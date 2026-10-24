@@ -17,6 +17,9 @@ model Student {
   institution   String   @db.VarChar(100)
   year_of_study String   @db.VarChar(10)
   status        String   @default("pending_clearance") @db.VarChar(30) // 'pending_clearance', 'cleared', 'rejected'
+  bank_name      String?  @db.VarChar(100)
+  account_number String?  @db.VarChar(10)
+  account_name   String?  @db.VarChar(100)
   created_at    DateTime @default(now())
 
   placements    Placement[]
@@ -63,6 +66,9 @@ model Placement {
   address                String   @db.VarChar(255)
   school_supervisor_id   Int?
   industry_supervisor_id Int?
+  industry_supervisor_name  String?  @db.VarChar(100)
+  industry_supervisor_email String?  @db.VarChar(100)
+  industry_supervisor_phone String?  @db.VarChar(20)
   start_date             DateTime
   end_date               DateTime
   created_at             DateTime @default(now())

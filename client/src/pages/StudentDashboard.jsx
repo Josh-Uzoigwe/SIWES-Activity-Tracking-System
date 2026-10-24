@@ -15,8 +15,16 @@ import {
   Paperclip, 
   ExternalLink,
   Award,
-  AlertCircle
+  AlertCircle,
+  Building,
+  Landmark,
+  CreditCard,
+  Edit3,
+  MapPin,
+  Phone,
+  Mail
 } from 'lucide-react';
+import { OFFICIAL_NIGERIAN_BANKS } from '../data/nigerianBanks';
 
 const StudentDashboard = () => {
   const { user } = useContext(AuthContext);
@@ -42,6 +50,28 @@ const StudentDashboard = () => {
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportFile, setReportFile] = useState(null);
   const [uploadingReport, setUploadingReport] = useState(false);
+
+  // Placement Self-Registration Modal state
+  const [showPlacementModal, setShowPlacementModal] = useState(false);
+  const [submittingPlacement, setSubmittingPlacement] = useState(false);
+  const [placementForm, setPlacementForm] = useState({
+    company_name: '',
+    address: '',
+    start_date: '',
+    end_date: '',
+    industry_supervisor_name: '',
+    industry_supervisor_email: '',
+    industry_supervisor_phone: ''
+  });
+
+  // Official Bank Details Modal state
+  const [showBankModal, setShowBankModal] = useState(false);
+  const [submittingBank, setSubmittingBank] = useState(false);
+  const [bankForm, setBankForm] = useState({
+    bank_name: '',
+    account_number: '',
+    account_name: ''
+  });
 
   const [message, setMessage] = useState({ text: '', type: '' });
 
@@ -158,6 +188,83 @@ const StudentDashboard = () => {
       setMessage({ text: err.response?.data?.message || 'Failed to upload report', type: 'error' });
     } finally {
       setUploadingReport(false);
+    }
+  };
+
+  const openPlacementModal = () => {
+    if (placement) {
+      setPlacementForm({
+        company_name: placement.company_name || '',
+        address: placement.address || '',
+        start_date: placement.start_date ? placement.start_date.split('T')[0] : '',
+        end_date: placement.end_date ? placement.end_date.split('T')[0] : '',
+        industry_supervisor_name: placement.industry_supervisor_name || placement.industry_supervisor?.full_name || '',
+        industry_supervisor_email: placement.industry_supervisor_email || placement.industry_supervisor?.email || '',
+        industry_supervisor_phone: placement.industry_supervisor_phone || ''
+      });
+    } else {
+      setPlacementForm({
+        company_name: '',
+        address: '',
+        start_date: '',
+        end_date: '',
+        industry_supervisor_name: '',
+        industry_supervisor_email: '',
+        industry_supervisor_phone: ''
+      });
+    }
+    setShowPlacementModal(true);
+  };
+
+  const handleSavePlacement = async (e) => {
+    e.preventDefault();
+    try {
+      setSubmittingPlacement(true);
+      const res = await api.post('/placements', placementForm);
+      if (res.data?.success) {
+        setMessage({ text: 'Place of attachment details saved! Your coordinator can now allocate your institutional supervisor.', type: 'success' });
+        setShowPlacementModal(false);
+        loadData();
+      }
+    } catch (err) {
+      setMessage({ text: err.response?.data?.message || 'Failed to save placement details', type: 'error' });
+    } finally {
+      setSubmittingPlacement(false);
+    }
+  };
+
+  const openBankModal = () => {
+    const profile = studentProfile || user;
+    setBankForm({
+      bank_name: profile.bank_name || '',
+      account_number: profile.account_number || '',
+      account_name: profile.account_name || profile.full_name || user.name || ''
+    });
+    setShowBankModal(true);
+  };
+
+  const handleSaveBankDetails = async (e) => {
+    e.preventDefault();
+    const cleanAccNo = String(bankForm.account_number).trim();
+    if (!/^\d{10}$/.test(cleanAccNo)) {
+      setMessage({ text: 'Account number must be exactly 10 digits (NUBAN).', type: 'error' });
+      return;
+    }
+    try {
+      setSubmittingBank(true);
+      const res = await api.put('/students/bank-details', {
+        ...bankForm,
+        account_number: cleanAccNo
+      });
+      if (res.data?.success) {
+        setMessage({ text: 'Official bank account details saved for ITF stipend disbursement!', type: 'success' });
+        setShowBankModal(false);
+        loadData();
+      }
+    } catch (err) {
+      setMessage({ text: err.response?.data?.message || 'Failed to save bank details', type: 'error' });
+    } finally {
+      setSubmittingBank(false);
     }
   };
 
@@ -351,70 +458,188 @@ const StudentDashboard = () => {
         </div>
       </div>
 
-      {/* Placement & Final Report Overview Cards */}
+      {/* Placement, Bank Account, & Final Report Overview Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px', marginBottom: '32px' }}>
-        {/* Placement Info */}
-        <div className="glass-panel" style={{ padding: '20px' }}>
-          <h3 style={{ fontSize: '0.95rem', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Award size={18} /> Workplace Placement Details
-          </h3>
-          {placement ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '0.85rem' }}>
-              <div><strong>Host Firm:</strong> {placement.company_name}</div>
-              <div><strong>Location:</strong> {placement.address}</div>
-              <div><strong>Duration:</strong> {new Date(placement.start_date).toLocaleDateString()} to {new Date(placement.end_date).toLocaleDateString()}</div>
-              <div><strong>School Supervisor:</strong> {placement.school_supervisor?.full_name || 'Pending assignment'}</div>
-              <div><strong>Industry Supervisor:</strong> {placement.industry_supervisor?.full_name || 'Pending assignment'}</div>
+        {/* Card 1: Workplace Placement Details */}
+        <div className="glass-panel" style={{ padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
+              <h3 style={{ fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Building size={18} color="#0284c7" /> Place of Attachment
+              </h3>
+              {placement ? (
+                <span className="badge approved" style={{ fontSize: '0.725rem' }}>Registered</span>
+              ) : (
+                <span className="badge pending" style={{ fontSize: '0.725rem' }}>Action Required</span>
+              )}
             </div>
-          ) : (
-            <p style={{ fontSize: '0.85rem' }}>No company placement assigned yet. Please contact your SIWES Coordinator.</p>
-          )}
-        </div>
 
-        {/* Final Report Card */}
-        <div className="glass-panel" style={{ padding: '20px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
-            <h3 style={{ fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <ShieldCheck size={18} /> Final Technical Report & ITF Stipend
-            </h3>
-            {finalReport?.stipend_verified ? (
-              <span className="badge approved" style={{ fontSize: '0.75rem' }}>Stipend Approved</span>
-            ) : finalReport ? (
-              <span className="badge pending" style={{ fontSize: '0.75rem' }}>Under ITF Review</span>
+            {placement ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.85rem' }}>
+                <div><strong>Host Firm:</strong> {placement.company_name}</div>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '6px', color: 'var(--text-muted)' }}>
+                  <MapPin size={14} style={{ marginTop: '2px', flexShrink: 0 }} />
+                  <span>{placement.address}</span>
+                </div>
+                <div><strong>Duration:</strong> {new Date(placement.start_date).toLocaleDateString()} – {new Date(placement.end_date).toLocaleDateString()}</div>
+                
+                <div style={{ marginTop: '6px', paddingTop: '8px', borderTop: '1px solid var(--border-subtle)' }}>
+                  <div style={{ fontWeight: 600, color: 'var(--text-main)', marginBottom: '4px' }}>Industry Supervisor (On-site):</div>
+                  <div style={{ color: 'var(--text-muted)' }}>
+                    {placement.industry_supervisor_name || placement.industry_supervisor?.full_name || 'Not provided'}
+                    {placement.industry_supervisor_phone && ` • ${placement.industry_supervisor_phone}`}
+                    {placement.industry_supervisor_email && ` • ${placement.industry_supervisor_email}`}
+                  </div>
+                </div>
+
+                <div style={{ marginTop: '4px', paddingTop: '6px', borderTop: '1px solid var(--border-subtle)' }}>
+                  <div style={{ fontWeight: 600, color: 'var(--text-main)', marginBottom: '4px' }}>School Supervisor (Institution):</div>
+                  {placement.school_supervisor?.full_name ? (
+                    <div style={{ color: '#15803d', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 500 }}>
+                      <CheckCircle size={14} /> {placement.school_supervisor.full_name} ({placement.school_supervisor.department || 'Academic'})
+                    </div>
+                  ) : (
+                    <div style={{ color: '#b45309', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <Clock size={14} /> Pending allocation by Coordinator
+                    </div>
+                  )}
+                </div>
+              </div>
             ) : (
-              <span className="badge pending" style={{ fontSize: '0.75rem' }}>Not Submitted</span>
+              <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
+                <p style={{ marginBottom: '10px' }}>
+                  Have you secured an industrial attachment? Register your host company name, physical address, and on-site industry supervisor so your institution can assign your supervising lecturer.
+                </p>
+              </div>
             )}
           </div>
 
-          {finalReport ? (
-            <div style={{ fontSize: '0.85rem' }}>
-              <p style={{ marginBottom: '8px' }}>
-                Uploaded on <strong>{new Date(finalReport.submitted_at).toLocaleDateString()}</strong>.
-              </p>
-              <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginTop: '12px' }}>
-                <a
-                  href={`${API_SERVER_URL}${finalReport.file_url}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="link"
-                  style={{ fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
-                >
-                  <FileText size={15} /> View Uploaded Document <ExternalLink size={12} />
-                </a>
-              </div>
+          <div style={{ marginTop: '16px', paddingTop: '12px', borderTop: '1px solid var(--border-subtle)' }}>
+            <button
+              type="button"
+              className={placement ? 'btn-secondary' : 'btn-primary'}
+              style={{ width: '100%', fontSize: '0.825rem', padding: '8px 14px', justifyContent: 'center' }}
+              onClick={openPlacementModal}
+            >
+              {placement ? (
+                <>
+                  <Edit3 size={14} style={{ marginRight: '6px' }} /> Update Place of Attachment
+                </>
+              ) : (
+                <>
+                  <Plus size={14} style={{ marginRight: '6px' }} /> Register Place of Attachment
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Card 2: ITF Stipend Bank Account Details */}
+        <div className="glass-panel" style={{ padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
+              <h3 style={{ fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Landmark size={18} color="#15803d" /> ITF Stipend Bank Account
+              </h3>
+              {(studentProfile?.bank_name && studentProfile?.account_number) ? (
+                <span className="badge approved" style={{ fontSize: '0.725rem' }}>Ready for Payment</span>
+              ) : (
+                <span className="badge pending" style={{ fontSize: '0.725rem' }}>Details Needed</span>
+              )}
             </div>
-          ) : (
-            <div>
-              <p style={{ fontSize: '0.85rem', marginBottom: '12px' }}>
-                Upload your completed SIWES technical report (PDF or Word) to qualify for official ITF stipend payment.
-              </p>
+
+            {(studentProfile?.bank_name && studentProfile?.account_number) ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.85rem' }}>
+                <div><strong>Bank:</strong> {studentProfile.bank_name}</div>
+                <div><strong>Account Number (NUBAN):</strong> <span style={{ fontFamily: 'monospace', fontSize: '1.05rem', fontWeight: 700, letterSpacing: '0.05em' }}>{studentProfile.account_number}</span></div>
+                <div><strong>Account Name:</strong> {studentProfile.account_name || studentProfile.full_name}</div>
+                <div style={{ fontSize: '0.75rem', color: '#15803d', marginTop: '6px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <ShieldCheck size={14} /> Official CBN Commercial Bank on File
+                </div>
+              </div>
+            ) : (
+              <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
+                <p style={{ marginBottom: '10px' }}>
+                  The Industrial Training Fund (ITF) requires your official Nigerian commercial bank account details to disburse your SIWES monthly stipends upon report approval.
+                </p>
+                <div style={{ fontSize: '0.75rem', color: '#b45309', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <AlertCircle size={14} /> Official commercial banks only (Access, GTBank, Zenith, First Bank, UBA, etc.)
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div style={{ marginTop: '16px', paddingTop: '12px', borderTop: '1px solid var(--border-subtle)' }}>
+            <button
+              type="button"
+              className={(studentProfile?.bank_name && studentProfile?.account_number) ? 'btn-secondary' : 'btn-primary'}
+              style={{ width: '100%', fontSize: '0.825rem', padding: '8px 14px', justifyContent: 'center' }}
+              onClick={openBankModal}
+            >
+              {(studentProfile?.bank_name && studentProfile?.account_number) ? (
+                <>
+                  <CreditCard size={14} style={{ marginRight: '6px' }} /> Update Bank Account
+                </>
+              ) : (
+                <>
+                  <Plus size={14} style={{ marginRight: '6px' }} /> Add Bank Account Details
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Card 3: Final Report Card */}
+        <div className="glass-panel" style={{ padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
+              <h3 style={{ fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <ShieldCheck size={18} color="#b45309" /> Final Technical Report & Stipend
+              </h3>
+              {finalReport?.stipend_verified ? (
+                <span className="badge approved" style={{ fontSize: '0.725rem' }}>Stipend Approved</span>
+              ) : finalReport ? (
+                <span className="badge pending" style={{ fontSize: '0.725rem' }}>Under ITF Review</span>
+              ) : (
+                <span className="badge pending" style={{ fontSize: '0.725rem' }}>Not Submitted</span>
+              )}
+            </div>
+
+            {finalReport ? (
+              <div style={{ fontSize: '0.85rem' }}>
+                <p style={{ marginBottom: '8px' }}>
+                  Uploaded on <strong>{new Date(finalReport.submitted_at).toLocaleDateString()}</strong>.
+                </p>
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginTop: '12px' }}>
+                  <a
+                    href={`${API_SERVER_URL}${finalReport.file_url}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="link"
+                    style={{ fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                  >
+                    <FileText size={15} /> View Uploaded Document <ExternalLink size={12} />
+                  </a>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.5, marginBottom: '12px' }}>
+                  Upload your completed SIWES technical report (PDF or Word) at the conclusion of your training to qualify for federal ITF stipend authorization.
+                </p>
+              </div>
+            )}
+          </div>
+
+          {!finalReport && (
+            <div style={{ marginTop: '16px', paddingTop: '12px', borderTop: '1px solid var(--border-subtle)' }}>
               <button
                 type="button"
                 className="btn-secondary"
-                style={{ fontSize: '0.825rem', padding: '6px 14px', gap: '6px' }}
+                style={{ width: '100%', fontSize: '0.825rem', padding: '8px 14px', justifyContent: 'center' }}
                 onClick={() => setShowReportModal(true)}
               >
-                <Upload size={14} /> Upload Final Report
+                <Upload size={14} style={{ marginRight: '6px' }} /> Upload Final Report
               </button>
             </div>
           )}
@@ -631,6 +856,202 @@ const StudentDashboard = () => {
                 </button>
                 <button type="submit" className="btn-primary" style={{ flex: 1 }} disabled={uploadingReport || !reportFile}>
                   {uploadingReport ? 'Uploading...' : 'Submit Report'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 3: Placement Registration */}
+      {showPlacementModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(3px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '16px' }}>
+          <div className="glass-panel" style={{ width: '100%', maxWidth: '520px', maxHeight: '90vh', overflowY: 'auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <div>
+                <h3 style={{ fontSize: '1.15rem' }}>{placement ? 'Update Place of Attachment' : 'Register Place of Attachment'}</h3>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>SIWES Form 8 / Host Firm Attachment Details</p>
+              </div>
+              <button type="button" onClick={() => setShowPlacementModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}>
+                <XCircle size={22} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSavePlacement}>
+              <div className="input-group">
+                <label>Host Company / Organization Name *</label>
+                <input
+                  type="text"
+                  required
+                  className="input-field"
+                  placeholder="e.g. Chevron Nigeria Limited, Dangote Cement, Flutterwave"
+                  value={placementForm.company_name}
+                  onChange={(e) => setPlacementForm({ ...placementForm, company_name: e.target.value })}
+                />
+              </div>
+
+              <div className="input-group">
+                <label>Company Physical Address & Location *</label>
+                <input
+                  type="text"
+                  required
+                  className="input-field"
+                  placeholder="e.g. Plot 12, Commercial Avenue, Ikeja, Lagos State"
+                  value={placementForm.address}
+                  onChange={(e) => setPlacementForm({ ...placementForm, address: e.target.value })}
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div className="input-group">
+                  <label>Training Start Date *</label>
+                  <input
+                    type="date"
+                    required
+                    className="input-field"
+                    value={placementForm.start_date}
+                    onChange={(e) => setPlacementForm({ ...placementForm, start_date: e.target.value })}
+                  />
+                </div>
+                <div className="input-group">
+                  <label>Training End Date *</label>
+                  <input
+                    type="date"
+                    required
+                    className="input-field"
+                    value={placementForm.end_date}
+                    onChange={(e) => setPlacementForm({ ...placementForm, end_date: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div style={{ margin: '16px 0', borderTop: '1px solid var(--border-subtle)', paddingTop: '14px' }}>
+                <div style={{ fontSize: '0.85rem', fontWeight: 600, marginBottom: '8px', color: 'var(--text-main)' }}>
+                  On-site Industry Supervisor Contact
+                </div>
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '12px' }}>
+                  Provide the details of your workplace supervisor who endorses your activities.
+                </p>
+
+                <div className="input-group">
+                  <label>Supervisor Full Name</label>
+                  <input
+                    type="text"
+                    className="input-field"
+                    placeholder="e.g. Engr. Tunde Adeleke"
+                    value={placementForm.industry_supervisor_name}
+                    onChange={(e) => setPlacementForm({ ...placementForm, industry_supervisor_name: e.target.value })}
+                  />
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div className="input-group">
+                    <label>Supervisor Email</label>
+                    <input
+                      type="email"
+                      className="input-field"
+                      placeholder="supervisor@company.com"
+                      value={placementForm.industry_supervisor_email}
+                      onChange={(e) => setPlacementForm({ ...placementForm, industry_supervisor_email: e.target.value })}
+                    />
+                  </div>
+                  <div className="input-group">
+                    <label>Supervisor Phone</label>
+                    <input
+                      type="tel"
+                      className="input-field"
+                      placeholder="e.g. 08031234567"
+                      value={placementForm.industry_supervisor_phone}
+                      onChange={(e) => setPlacementForm({ ...placementForm, industry_supervisor_phone: e.target.value })}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
+                <button type="button" className="btn-secondary" style={{ flex: 1 }} onClick={() => setShowPlacementModal(false)}>
+                  Cancel
+                </button>
+                <button type="submit" className="btn-primary" style={{ flex: 1 }} disabled={submittingPlacement}>
+                  {submittingPlacement ? 'Saving...' : placement ? 'Update Details' : 'Register Attachment'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 4: Official Bank Details */}
+      {showBankModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(3px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '16px' }}>
+          <div className="glass-panel" style={{ width: '100%', maxWidth: '480px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <div>
+                <h3 style={{ fontSize: '1.15rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Landmark size={20} color="#15803d" /> SIWES Stipend Account Details
+                </h3>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Federal Industrial Training Fund (ITF) Direct Disbursement</p>
+              </div>
+              <button type="button" onClick={() => setShowBankModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}>
+                <XCircle size={22} />
+              </button>
+            </div>
+
+            <div style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', padding: '12px', marginBottom: '16px', fontSize: '0.785rem', color: '#166534' }}>
+              <strong>Official CBN Commercial Banks Only:</strong> The Industrial Training Fund disburse allowances exclusively to verified Nigerian commercial bank accounts.
+            </div>
+
+            <form onSubmit={handleSaveBankDetails}>
+              <div className="input-group">
+                <label>Official Bank Name *</label>
+                <select
+                  required
+                  className="select-field"
+                  value={bankForm.bank_name}
+                  onChange={(e) => setBankForm({ ...bankForm, bank_name: e.target.value })}
+                >
+                  <option value="">-- Choose Commercial Bank ({OFFICIAL_NIGERIAN_BANKS.length}) --</option>
+                  {OFFICIAL_NIGERIAN_BANKS.map((b) => (
+                    <option key={b} value={b}>{b}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="input-group">
+                <label>10-Digit Account Number (NUBAN) *</label>
+                <input
+                  type="text"
+                  required
+                  maxLength={10}
+                  className="input-field"
+                  placeholder="e.g. 0123456789"
+                  value={bankForm.account_number}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, '').slice(0, 10);
+                    setBankForm({ ...bankForm, account_number: val });
+                  }}
+                  style={{ fontFamily: 'monospace', fontSize: '1.05rem', letterSpacing: '0.08em' }}
+                />
+              </div>
+
+              <div className="input-group">
+                <label>Account Full Name (as registered with your bank) *</label>
+                <input
+                  type="text"
+                  required
+                  className="input-field"
+                  placeholder="e.g. JOHN CHUKWUEMEKA DOE"
+                  value={bankForm.account_name}
+                  onChange={(e) => setBankForm({ ...bankForm, account_name: e.target.value.toUpperCase() })}
+                />
+              </div>
+
+              <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
+                <button type="button" className="btn-secondary" style={{ flex: 1 }} onClick={() => setShowBankModal(false)}>
+                  Cancel
+                </button>
+                <button type="submit" className="btn-primary" style={{ flex: 1 }} disabled={submittingBank || bankForm.account_number.length !== 10 || !bankForm.bank_name}>
+                  {submittingBank ? 'Saving...' : 'Save Bank Details'}
                 </button>
               </div>
             </form>

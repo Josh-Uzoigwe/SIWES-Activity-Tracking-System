@@ -11,8 +11,10 @@ router.get('/', studentController.getStudents);
 // Get specific student
 router.get('/:id', studentController.getStudentById);
 
+// Student updates official commercial bank account details
+router.put('/bank-details', authorize('STUDENT'), studentController.updateBankDetails);
+
 // Coordinator clears student for SIWES
-const { authorize } = require('../middlewares/auth');
 router.put('/:id/clear', authorize('COORDINATOR'), studentController.clearStudent);
 
 // Coordinator rejects/flags student

@@ -28,7 +28,7 @@ exports.getReports = async (req, res, next) => {
     const reports = await prisma.finalReport.findMany({
       where: whereClause,
       include: {
-        student: { select: { full_name: true, matric_no: true, institution: true } }
+        student: { select: { full_name: true, matric_no: true, institution: true, bank_name: true, account_number: true, account_name: true } }
       }
     });
 

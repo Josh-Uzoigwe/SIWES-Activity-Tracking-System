@@ -234,18 +234,19 @@ const CoordinatorHomeScreen = ({ navigation }) => {
     setShowPlacementModal(true);
   };
 
-  // 6. Save Placement
+  // 6. Save Placement / Assign School Supervisor
   const handleSavePlacement = async () => {
-    if (!placementForm.company_name.trim() || !placementForm.address.trim() || !placementForm.start_date || !placementForm.end_date) {
-      Alert.alert('Required Fields', 'Please fill company name, address, and placement dates.');
-      return;
-    }
     setSubmittingPlacement(true);
     try {
       const existing = selectedStudent.placements?.[0];
       let placementId = existing?.placement_id;
 
       if (!placementId) {
+        if (!placementForm.company_name.trim() || !placementForm.address.trim()) {
+          Alert.alert('Required Fields', 'Please provide company name and address to create attachment record.');
+          setSubmittingPlacement(false);
+          return;
+        }
         const createRes = await api.post('/placements', {
           student_id: selectedStudent.student_id,
           company_name: placementForm.company_name,
@@ -256,18 +257,20 @@ const CoordinatorHomeScreen = ({ navigation }) => {
         placementId = createRes.data?.data?.placement_id;
       }
 
-      if (placementForm.school_supervisor_id || placementForm.industry_supervisor_id) {
+      if (placementId) {
         await api.put(`/placements/${placementId}`, {
-          school_supervisor_id: placementForm.school_supervisor_id ? parseInt(placementForm.school_supervisor_id, 10) : undefined,
+          school_supervisor_id: placementForm.school_supervisor_id ? parseInt(placementForm.school_supervisor_id, 10) : null,
           industry_supervisor_id: placementForm.industry_supervisor_id ? parseInt(placementForm.industry_supervisor_id, 10) : undefined,
+          company_name: placementForm.company_name || undefined,
+          address: placementForm.address || undefined,
         });
       }
 
-      Alert.alert('Placement Saved', 'Host company attachment and supervisor assignment updated.');
+      Alert.alert('Supervisor Assigned', 'School-based supervisor allocated successfully.');
       setShowPlacementModal(false);
       loadData();
     } catch (err) {
-      Alert.alert('Placement Error', err.response?.data?.message || 'Failed to update placement.');
+      Alert.alert('Assignment Error', err.response?.data?.message || 'Failed to update placement.');
     } finally {
       setSubmittingPlacement(false);
     }
@@ -453,6 +456,21 @@ const CoordinatorHomeScreen = ({ navigation }) => {
                           <View style={{ flex: 1 }}>
                             <Text style={styles.cardTitle}>{s.full_name}</Text>
                             <Text style={styles.cardMeta}>{s.matric_no} • {s.department} ({s.year_of_study})</Text>
+                            {s.account_number ? (
+                              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 }}>
+                                <Ionicons name="card-outline" size={11} color="#15803d" />
+                                <Text style={{ fontSize: 10, color: '#15803d', fontWeight: '700' }}>
+                                  {s.bank_name} • {s.account_number}
+                                </Text>
+                              </View>
+                            ) : (
+                              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 }}>
+                                <Ionicons name="alert-circle-outline" size={11} color="#b45309" />
+                                <Text style={{ fontSize: 10, color: '#b45309', fontWeight: '600' }}>
+                                  No Bank Details Registered
+                                </Text>
+                              </View>
+                            )}
                           </View>
                           {isCleared ? (
                             <View style={[styles.badge, styles.badgeSuccess]}>
@@ -480,11 +498,15 @@ const CoordinatorHomeScreen = ({ navigation }) => {
                               <Text style={styles.placementCompany}>{placement.company_name}</Text>
                               <Text style={styles.placementAddress}>{placement.address || 'Address on file'}</Text>
                               <Text style={styles.placementSupervisors}>
-                                Academic: {placement.school_supervisor?.full_name || 'Unassigned'} • Industry: {placement.industry_supervisor?.full_name || 'Unassigned'}
+                                School Supervisor: {placement.school_supervisor?.full_name || 'Unassigned'}
+                              </Text>
+                              <Text style={[styles.placementSupervisors, { marginTop: 1 }]}>
+                                Industry Supervisor: {placement.industry_supervisor_name || placement.industry_supervisor?.full_name || 'Not provided'}
+                                {placement.industry_supervisor_phone ? ` (${placement.industry_supervisor_phone})` : ''}
                               </Text>
                             </>
                           ) : (
-                            <Text style={styles.noPlacementText}>No workplace placement recorded yet.</Text>
+                            <Text style={styles.noPlacementText}>Student has not registered place of attachment yet.</Text>
                           )}
                         </View>
 
@@ -515,9 +537,9 @@ const CoordinatorHomeScreen = ({ navigation }) => {
                             style={[styles.btnMini, styles.btnPlacement]}
                             onPress={() => openPlacementModal(s)}
                           >
-                            <Ionicons name="briefcase-outline" size={14} color="#0f172a" />
+                            <Ionicons name="person-add-outline" size={14} color="#0f172a" />
                             <Text style={[styles.btnMiniText, { color: '#0f172a' }]}>
-                              {placement ? 'Edit Placement' : 'Assign Placement'}
+                              {placement?.school_supervisor ? 'Change School Supervisor' : 'Assign School Supervisor'}
                             </Text>
                           </TouchableOpacity>
                           <TouchableOpacity
@@ -786,13 +808,13 @@ const CoordinatorHomeScreen = ({ navigation }) => {
         </View>
       </Modal>
 
-      {/* Placement Modal */}
+      {/* Placement / Supervisor Allocation Modal */}
       <Modal visible={showPlacementModal} transparent animationType="slide">
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <View style={{ flex: 1 }}>
-                <Text style={styles.modalTitle}>Assign Host Attachment</Text>
+                <Text style={styles.modalTitle}>Assign School-Based Supervisor</Text>
                 <Text style={styles.modalSubtitle}>{selectedStudent?.full_name} ({selectedStudent?.matric_no})</Text>
               </View>
               <TouchableOpacity onPress={() => setShowPlacementModal(false)}>
@@ -801,6 +823,26 @@ const CoordinatorHomeScreen = ({ navigation }) => {
             </View>
 
             <ScrollView style={styles.modalForm}>
+              {selectedStudent?.placements?.[0]?.company_name ? (
+                <View style={{ backgroundColor: '#f0fdf4', borderLeftWidth: 3, borderLeftColor: '#15803d', padding: 10, borderRadius: 6, marginBottom: 12 }}>
+                  <Text style={{ fontSize: 11, fontWeight: '700', color: '#166534' }}>
+                    Student-Reported Place of Attachment:
+                  </Text>
+                  <Text style={{ fontSize: 13, fontWeight: '800', color: '#0f172a', marginTop: 2 }}>
+                    {selectedStudent.placements[0].company_name}
+                  </Text>
+                  <Text style={{ fontSize: 11, color: '#475569' }}>
+                    {selectedStudent.placements[0].address}
+                  </Text>
+                  {selectedStudent.placements[0].industry_supervisor_name ? (
+                    <Text style={{ fontSize: 11, color: '#166534', marginTop: 4 }}>
+                      On-Site Industry Trainer: {selectedStudent.placements[0].industry_supervisor_name}
+                      {selectedStudent.placements[0].industry_supervisor_phone ? ` (${selectedStudent.placements[0].industry_supervisor_phone})` : ''}
+                    </Text>
+                  ) : null}
+                </View>
+              ) : null}
+
               <Text style={styles.inputLabel}>Host Company Name *</Text>
               <TextInput
                 style={styles.modalInput}
@@ -819,7 +861,7 @@ const CoordinatorHomeScreen = ({ navigation }) => {
 
               <View style={styles.rowInputs}>
                 <View style={{ flex: 1, marginRight: 8 }}>
-                  <Text style={styles.inputLabel}>Start Date (YYYY-MM-DD) *</Text>
+                  <Text style={styles.inputLabel}>Start Date (YYYY-MM-DD)</Text>
                   <TextInput
                     style={styles.modalInput}
                     placeholder="2026-06-01"
@@ -828,7 +870,7 @@ const CoordinatorHomeScreen = ({ navigation }) => {
                   />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.inputLabel}>End Date (YYYY-MM-DD) *</Text>
+                  <Text style={styles.inputLabel}>End Date (YYYY-MM-DD)</Text>
                   <TextInput
                     style={styles.modalInput}
                     placeholder="2026-12-01"

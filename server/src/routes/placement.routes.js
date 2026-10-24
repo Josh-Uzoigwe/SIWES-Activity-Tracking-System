@@ -8,8 +8,8 @@ router.use(authenticate);
 // Get placement by student ID
 router.get('/:studentId', placementController.getPlacementByStudentId);
 
-// Create a placement (Coordinator only)
-router.post('/', authorize('COORDINATOR'), placementController.createPlacement);
+// Register or update placement (Students submit their own attachment; Coordinators can also manage)
+router.post('/', authorize('COORDINATOR', 'STUDENT'), placementController.createPlacement);
 
 // Assign supervisors to a placement (Coordinator only)
 router.put('/:id', authorize('COORDINATOR'), placementController.assignSupervisors);

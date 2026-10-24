@@ -161,7 +161,10 @@ exports.exportItfNational = async (req, res, next) => {
         Student_Name: r.student.full_name,
         Matric_No: r.student.matric_no,
         Institution: r.student.institution,
-        Verified_At: r.verified_at
+        Bank_Name: r.student.bank_name || 'Pending',
+        Account_Number: r.student.account_number ? `'${r.student.account_number}` : 'Pending',
+        Account_Name: r.student.account_name || r.student.full_name,
+        Verified_At: r.verified_at ? new Date(r.verified_at).toLocaleDateString() : 'N/A'
       }));
 
       const parser = new Parser();
@@ -171,20 +174,21 @@ exports.exportItfNational = async (req, res, next) => {
       return res.status(200).send(csv);
     }
 
-    const doc = new PDFDocument();
+    const doc = new PDFDocument({ margin: 40 });
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename=itf_national_report.pdf`);
     doc.pipe(res);
 
-    doc.fontSize(20).text('ITF National Stipend Verification Report', { align: 'center' });
+    doc.fontSize(18).text('Industrial Training Fund (ITF)', { align: 'center' });
+    doc.fontSize(14).text('National SIWES Stipend Disbursement Roster', { align: 'center' });
     doc.moveDown();
 
-    reports.forEach(r => {
-      doc.fontSize(12)
-         .text(`Institution: ${r.student.institution}`)
-         .text(`Student: ${r.student.full_name} (${r.student.matric_no})`)
-         .text(`Verified On: ${r.verified_at ? new Date(r.verified_at).toDateString() : 'N/A'}`);
-      doc.moveDown();
+    reports.forEach((r, idx) => {
+      doc.fontSize(11)
+         .text(`${idx + 1}. Student: ${r.student.full_name} (${r.student.matric_no}) — ${r.student.institution}`)
+         .text(`   Bank: ${r.student.bank_name || 'Pending'} | Acc No: ${r.student.account_number || 'Pending'} | Acc Name: ${r.student.account_name || r.student.full_name}`)
+         .text(`   Authorized On: ${r.verified_at ? new Date(r.verified_at).toDateString() : 'Record'}`);
+      doc.moveDown(0.5);
     });
 
     doc.end();
