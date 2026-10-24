@@ -35,7 +35,7 @@ app.use(cors({
       return callback(null, true);
     }
 
-    if (allowedOrigins.includes(origin)) {
+    if (allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
 
@@ -83,6 +83,21 @@ app.use('/api/v1/visits', visitRoutes);
 app.use('/api/v1/analytics', analyticsRoutes);
 app.use('/api/v1/reports', reportRoutes);
 app.use('/api/v1/notifications', notificationRoutes);
+
+// Health check and root route (required for Render uptime monitors)
+app.get('/', (req, res) => {
+  res.status(200).json({
+    status: 'online',
+    service: 'SIWES Activity Tracking System API',
+    version: '1.0.0',
+    documentation: '/api/v1',
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
+
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'healthy', timestamp: new Date().toISOString() });
+});
 
 // Global Error Handler
 app.use((err, req, res, next) => {
