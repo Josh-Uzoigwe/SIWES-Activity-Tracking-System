@@ -36,6 +36,8 @@ const ItfDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [institutionFilter, setInstitutionFilter] = useState('ALL');
+  const [reportStatusFilter, setReportStatusFilter] = useState('ALL'); // 'ALL', 'PENDING', 'VERIFIED'
+  const [placementFilter, setPlacementFilter] = useState('ALL'); // 'ALL', 'PLACED', 'UNPLACED'
   const [actionLoading, setActionLoading] = useState(null);
   const [message, setMessage] = useState({ text: '', type: '' });
 
@@ -247,7 +249,11 @@ const ItfDashboard = () => {
       s.matric_no?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       s.institution?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       s.department?.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesInst && matchesSearch;
+    const matchesPlacement = 
+      placementFilter === 'ALL' ? true :
+      placementFilter === 'PLACED' ? Boolean(s.placements && s.placements.length > 0) :
+      Boolean(!s.placements || s.placements.length === 0);
+    return matchesInst && matchesSearch && matchesPlacement;
   });
 
   const filteredReports = finalReports.filter(r => {
@@ -256,7 +262,11 @@ const ItfDashboard = () => {
       r.student?.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       r.student?.matric_no?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       r.student?.institution?.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesInst && matchesSearch;
+    const matchesStatus = 
+      reportStatusFilter === 'ALL' ? true :
+      reportStatusFilter === 'VERIFIED' ? Boolean(r.stipend_verified) :
+      !r.stipend_verified;
+    return matchesInst && matchesSearch && matchesStatus;
   });
 
   const filteredInstitutions = institutionsList.filter(inst =>
@@ -271,6 +281,8 @@ const ItfDashboard = () => {
 
   const verifiedCount = finalReports.filter(r => r.stipend_verified).length;
   const pendingCount = finalReports.filter(r => !r.stipend_verified).length;
+  const placedCount = students.filter(s => s.placements && s.placements.length > 0).length;
+  const unplacedCount = students.length - placedCount;
 
   return (
     <div style={{ padding: '24px 0' }}>
@@ -319,62 +331,196 @@ const ItfDashboard = () => {
         </div>
       )}
 
-      {/* KPI Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: '16px', marginBottom: '32px' }}>
-        <div className="glass-panel" style={{ padding: '20px' }}>
+      {/* Clickable KPI Cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '32px' }}>
+        {/* Card 1: Accredited Universities */}
+        <button
+          type="button"
+          onClick={() => {
+            setActiveTab('institutions');
+            setSearchQuery('');
+            setInstitutionFilter('ALL');
+          }}
+          className="glass-panel stat-card-interactive"
+          style={{
+            padding: '20px',
+            textAlign: 'left',
+            border: activeTab === 'institutions' ? '2px solid #0f172a' : '1px solid var(--border-subtle)',
+            backgroundColor: activeTab === 'institutions' ? 'var(--surface-hover)' : 'var(--bg-surface)',
+          }}
+          title="Click to view all accredited institutions"
+        >
           <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)', marginBottom: '8px' }}>
-            <span style={{ fontSize: '0.85rem', fontWeight: 500 }}>Accredited Universities</span>
-            <Building2 size={18} />
+            <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Accredited Universities</span>
+            <Building2 size={18} color="#0f172a" />
           </div>
-          <div style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--text-main)' }}>
+          <div style={{ fontSize: '1.85rem', fontWeight: 800, color: 'var(--text-main)', letterSpacing: '-0.03em' }}>
             {institutionsList.length}
           </div>
-          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Approved tertiary institutions</span>
-        </div>
-
-        <div className="glass-panel" style={{ padding: '20px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)', marginBottom: '8px' }}>
-            <span style={{ fontSize: '0.85rem', fontWeight: 500 }}>Nationwide Students</span>
-            <Users size={18} />
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>Approved tertiary institutions</div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '12px', paddingTop: '8px', borderTop: '1px solid var(--border-subtle)' }}>
+            <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#2563eb' }}>
+              View directory ➔
+            </span>
+            {activeTab === 'institutions' && (
+              <span style={{ fontSize: '0.65rem', backgroundColor: '#0f172a', color: '#ffffff', padding: '2px 6px', borderRadius: '4px', fontWeight: 700 }}>
+                ACTIVE TAB
+              </span>
+            )}
           </div>
-          <div style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--text-main)' }}>
+        </button>
+
+        {/* Card 2: Nationwide Students */}
+        <button
+          type="button"
+          onClick={() => {
+            setActiveTab('students');
+            setPlacementFilter('ALL');
+            setSearchQuery('');
+            setInstitutionFilter('ALL');
+          }}
+          className="glass-panel stat-card-interactive"
+          style={{
+            padding: '20px',
+            textAlign: 'left',
+            border: (activeTab === 'students' && placementFilter === 'ALL') ? '2px solid #0f172a' : '1px solid var(--border-subtle)',
+            backgroundColor: (activeTab === 'students' && placementFilter === 'ALL') ? 'var(--surface-hover)' : 'var(--bg-surface)',
+          }}
+          title="Click to view full nationwide student roster"
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)', marginBottom: '8px' }}>
+            <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Nationwide Students</span>
+            <Users size={18} color="#0f172a" />
+          </div>
+          <div style={{ fontSize: '1.85rem', fontWeight: 800, color: 'var(--text-main)', letterSpacing: '-0.03em' }}>
             {analytics?.totalStudents ?? students.length}
           </div>
-          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Across all institutions</span>
-        </div>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>Across all institutions</div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '12px', paddingTop: '8px', borderTop: '1px solid var(--border-subtle)' }}>
+            <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#2563eb' }}>
+              View roster ➔
+            </span>
+            {activeTab === 'students' && placementFilter === 'ALL' && (
+              <span style={{ fontSize: '0.65rem', backgroundColor: '#0f172a', color: '#ffffff', padding: '2px 6px', borderRadius: '4px', fontWeight: 700 }}>
+                ACTIVE TAB
+              </span>
+            )}
+          </div>
+        </button>
 
-        <div className="glass-panel" style={{ padding: '20px' }}>
+        {/* Card 3: Total Placements */}
+        <button
+          type="button"
+          onClick={() => {
+            setActiveTab('students');
+            setPlacementFilter('PLACED');
+            setSearchQuery('');
+            setInstitutionFilter('ALL');
+          }}
+          className="glass-panel stat-card-interactive"
+          style={{
+            padding: '20px',
+            textAlign: 'left',
+            border: (activeTab === 'students' && placementFilter === 'PLACED') ? '2px solid #059669' : '1px solid var(--border-subtle)',
+            backgroundColor: (activeTab === 'students' && placementFilter === 'PLACED') ? '#f0fdf4' : 'var(--bg-surface)',
+          }}
+          title="Click to view placed students with employer attachments"
+        >
           <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)', marginBottom: '8px' }}>
-            <span style={{ fontSize: '0.85rem', fontWeight: 500 }}>Total Placements</span>
-            <ShieldCheck size={18} />
+            <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Total Placements</span>
+            <ShieldCheck size={18} color="#059669" />
           </div>
-          <div style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--text-main)' }}>
-            {analytics?.totalPlacements ?? 0}
+          <div style={{ fontSize: '1.85rem', fontWeight: 800, color: '#059669', letterSpacing: '-0.03em' }}>
+            {analytics?.totalPlacements ?? placedCount}
           </div>
-          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Host company attachments</span>
-        </div>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>Host company attachments</div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '12px', paddingTop: '8px', borderTop: '1px solid var(--border-subtle)' }}>
+            <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#059669' }}>
+              View placements ➔
+            </span>
+            {activeTab === 'students' && placementFilter === 'PLACED' && (
+              <span style={{ fontSize: '0.65rem', backgroundColor: '#059669', color: '#ffffff', padding: '2px 6px', borderRadius: '4px', fontWeight: 700 }}>
+                PLACED ONLY
+              </span>
+            )}
+          </div>
+        </button>
 
-        <div className="glass-panel" style={{ padding: '20px' }}>
+        {/* Card 4: Pending Stipends */}
+        <button
+          type="button"
+          onClick={() => {
+            setActiveTab('reports');
+            setReportStatusFilter('PENDING');
+            setSearchQuery('');
+            setInstitutionFilter('ALL');
+          }}
+          className="glass-panel stat-card-interactive"
+          style={{
+            padding: '20px',
+            textAlign: 'left',
+            border: (activeTab === 'reports' && reportStatusFilter === 'PENDING') ? '2px solid #b45309' : '1px solid var(--border-subtle)',
+            backgroundColor: (activeTab === 'reports' && reportStatusFilter === 'PENDING') ? '#fffbeb' : 'var(--bg-surface)',
+          }}
+          title="Click to view reports awaiting ITF stipend verification"
+        >
           <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)', marginBottom: '8px' }}>
-            <span style={{ fontSize: '0.85rem', fontWeight: 500 }}>Pending Stipends</span>
-            <Clock size={18} />
+            <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Pending Stipends</span>
+            <Clock size={18} color="#b45309" />
           </div>
-          <div style={{ fontSize: '1.75rem', fontWeight: 700, color: '#b45309' }}>
+          <div style={{ fontSize: '1.85rem', fontWeight: 800, color: '#b45309', letterSpacing: '-0.03em' }}>
             {pendingCount}
           </div>
-          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Awaiting ITF verification</span>
-        </div>
-
-        <div className="glass-panel" style={{ padding: '20px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)', marginBottom: '8px' }}>
-            <span style={{ fontSize: '0.85rem', fontWeight: 500 }}>Authorized for Stipend</span>
-            <CheckCircle2 size={18} />
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>Awaiting ITF verification</div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '12px', paddingTop: '8px', borderTop: '1px solid var(--border-subtle)' }}>
+            <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#b45309' }}>
+              Review queue ➔
+            </span>
+            {activeTab === 'reports' && reportStatusFilter === 'PENDING' && (
+              <span style={{ fontSize: '0.65rem', backgroundColor: '#b45309', color: '#ffffff', padding: '2px 6px', borderRadius: '4px', fontWeight: 700 }}>
+                AUDIT QUEUE
+              </span>
+            )}
           </div>
-          <div style={{ fontSize: '1.75rem', fontWeight: 700, color: '#15803d' }}>
+        </button>
+
+        {/* Card 5: Authorized for Stipend */}
+        <button
+          type="button"
+          onClick={() => {
+            setActiveTab('reports');
+            setReportStatusFilter('VERIFIED');
+            setSearchQuery('');
+            setInstitutionFilter('ALL');
+          }}
+          className="glass-panel stat-card-interactive"
+          style={{
+            padding: '20px',
+            textAlign: 'left',
+            border: (activeTab === 'reports' && reportStatusFilter === 'VERIFIED') ? '2px solid #15803d' : '1px solid var(--border-subtle)',
+            backgroundColor: (activeTab === 'reports' && reportStatusFilter === 'VERIFIED') ? '#f0fdf4' : 'var(--bg-surface)',
+          }}
+          title="Click to view reports authorized for stipend disbursement"
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)', marginBottom: '8px' }}>
+            <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Authorized for Stipend</span>
+            <CheckCircle2 size={18} color="#15803d" />
+          </div>
+          <div style={{ fontSize: '1.85rem', fontWeight: 800, color: '#15803d', letterSpacing: '-0.03em' }}>
             {verifiedCount}
           </div>
-          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Ready for disbursement</span>
-        </div>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>Ready for disbursement</div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '12px', paddingTop: '8px', borderTop: '1px solid var(--border-subtle)' }}>
+            <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#15803d' }}>
+              View authorized ➔
+            </span>
+            {activeTab === 'reports' && reportStatusFilter === 'VERIFIED' && (
+              <span style={{ fontSize: '0.65rem', backgroundColor: '#15803d', color: '#ffffff', padding: '2px 6px', borderRadius: '4px', fontWeight: 700 }}>
+                AUTHORIZED
+              </span>
+            )}
+          </div>
+        </button>
       </div>
 
       {/* Tabs */}
@@ -451,8 +597,8 @@ const ItfDashboard = () => {
 
       {/* Filters Bar */}
       {activeTab !== 'export' && (
-        <div style={{ display: 'flex', gap: '12px', marginBottom: '20px', flexWrap: 'wrap' }}>
-          <div style={{ position: 'relative', flex: 1, minWidth: '260px' }}>
+        <div style={{ display: 'flex', gap: '12px', marginBottom: '20px', flexWrap: 'wrap', alignItems: 'center' }}>
+          <div style={{ position: 'relative', flex: 1, minWidth: '240px' }}>
             <Search size={16} style={{ position: 'absolute', left: '12px', top: '12px', color: 'var(--text-muted)' }} />
             <input
               type="text"
@@ -464,7 +610,7 @@ const ItfDashboard = () => {
             />
           </div>
 
-          <div style={{ minWidth: '220px' }}>
+          <div style={{ minWidth: '200px' }}>
             <select
               className="select-field"
               value={institutionFilter}
@@ -478,6 +624,88 @@ const ItfDashboard = () => {
               ))}
             </select>
           </div>
+
+          {/* Quick Sub-Filter Pills for Reports */}
+          {activeTab === 'reports' && (
+            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                onClick={() => setReportStatusFilter('ALL')}
+                className={reportStatusFilter === 'ALL' ? 'btn-primary' : 'btn-secondary'}
+                style={{ padding: '8px 12px', fontSize: '0.8rem' }}
+              >
+                All Reports ({finalReports.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setReportStatusFilter('PENDING')}
+                className={reportStatusFilter === 'PENDING' ? 'btn-primary' : 'btn-secondary'}
+                style={{
+                  padding: '8px 12px',
+                  fontSize: '0.8rem',
+                  borderColor: reportStatusFilter === 'PENDING' ? '#b45309' : undefined,
+                  backgroundColor: reportStatusFilter === 'PENDING' ? '#b45309' : undefined,
+                  color: reportStatusFilter === 'PENDING' ? '#ffffff' : '#b45309'
+                }}
+              >
+                Pending Audit ({pendingCount})
+              </button>
+              <button
+                type="button"
+                onClick={() => setReportStatusFilter('VERIFIED')}
+                className={reportStatusFilter === 'VERIFIED' ? 'btn-primary' : 'btn-secondary'}
+                style={{
+                  padding: '8px 12px',
+                  fontSize: '0.8rem',
+                  borderColor: reportStatusFilter === 'VERIFIED' ? '#15803d' : undefined,
+                  backgroundColor: reportStatusFilter === 'VERIFIED' ? '#15803d' : undefined,
+                  color: reportStatusFilter === 'VERIFIED' ? '#ffffff' : '#15803d'
+                }}
+              >
+                Authorized ({verifiedCount})
+              </button>
+            </div>
+          )}
+
+          {/* Quick Sub-Filter Pills for Students */}
+          {activeTab === 'students' && (
+            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                onClick={() => setPlacementFilter('ALL')}
+                className={placementFilter === 'ALL' ? 'btn-primary' : 'btn-secondary'}
+                style={{ padding: '8px 12px', fontSize: '0.8rem' }}
+              >
+                All Students ({students.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setPlacementFilter('PLACED')}
+                className={placementFilter === 'PLACED' ? 'btn-primary' : 'btn-secondary'}
+                style={{
+                  padding: '8px 12px',
+                  fontSize: '0.8rem',
+                  borderColor: placementFilter === 'PLACED' ? '#059669' : undefined,
+                  backgroundColor: placementFilter === 'PLACED' ? '#059669' : undefined,
+                  color: placementFilter === 'PLACED' ? '#ffffff' : '#059669'
+                }}
+              >
+                Placed ({placedCount})
+              </button>
+              <button
+                type="button"
+                onClick={() => setPlacementFilter('UNPLACED')}
+                className={placementFilter === 'UNPLACED' ? 'btn-primary' : 'btn-secondary'}
+                style={{
+                  padding: '8px 12px',
+                  fontSize: '0.8rem',
+                  color: placementFilter === 'UNPLACED' ? '#ffffff' : 'var(--text-muted)'
+                }}
+              >
+                Awaiting Placement ({unplacedCount})
+              </button>
+            </div>
+          )}
         </div>
       )}
 

@@ -49,6 +49,8 @@ const ItfHomeScreen = ({ navigation }) => {
   // Search & filter
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedInstFilter, setSelectedInstFilter] = useState('ALL');
+  const [reportStatusFilter, setReportStatusFilter] = useState('ALL'); // 'ALL' | 'PENDING' | 'VERIFIED'
+  const [placementFilter, setPlacementFilter] = useState('ALL'); // 'ALL' | 'PLACED' | 'UNPLACED'
 
   // Onboard Institution Modal with Cascading Directory Selection
   const [showOnboardModal, setShowOnboardModal] = useState(false);
@@ -342,23 +344,34 @@ const ItfHomeScreen = ({ navigation }) => {
   // Counts
   const verifiedCount = finalReports.filter((r) => r.stipend_verified).length;
   const pendingCount = finalReports.filter((r) => !r.stipend_verified).length;
+  const placedCount = students.filter((s) => (s.placements?.length || 0) > 0).length;
+  const unplacedCount = students.length - placedCount;
 
   // Filtered lists
   const institutionOptions = ['ALL', ...new Set(institutionsList.map((i) => i.name).filter(Boolean))];
 
   const filteredReports = finalReports.filter((r) => {
     const matchesInst = selectedInstFilter === 'ALL' || r.student?.institution === selectedInstFilter;
+    const matchesStatus =
+      reportStatusFilter === 'ALL' ||
+      (reportStatusFilter === 'VERIFIED' && r.stipend_verified) ||
+      (reportStatusFilter === 'PENDING' && !r.stipend_verified);
     const q = searchQuery.toLowerCase();
     const matchesSearch =
       !q ||
       r.student?.full_name?.toLowerCase().includes(q) ||
       r.student?.matric_no?.toLowerCase().includes(q) ||
       r.student?.institution?.toLowerCase().includes(q);
-    return matchesInst && matchesSearch;
+    return matchesInst && matchesStatus && matchesSearch;
   });
 
   const filteredStudents = students.filter((s) => {
     const matchesInst = selectedInstFilter === 'ALL' || s.institution === selectedInstFilter;
+    const hasPlacement = (s.placements?.length || 0) > 0;
+    const matchesPlacement =
+      placementFilter === 'ALL' ||
+      (placementFilter === 'PLACED' && hasPlacement) ||
+      (placementFilter === 'UNPLACED' && !hasPlacement);
     const q = searchQuery.toLowerCase();
     const matchesSearch =
       !q ||
@@ -366,7 +379,7 @@ const ItfHomeScreen = ({ navigation }) => {
       s.matric_no?.toLowerCase().includes(q) ||
       s.institution?.toLowerCase().includes(q) ||
       s.department?.toLowerCase().includes(q);
-    return matchesInst && matchesSearch;
+    return matchesInst && matchesPlacement && matchesSearch;
   });
 
   const filteredInstitutions = institutionsList.filter((inst) => {
@@ -671,52 +684,151 @@ const ItfHomeScreen = ({ navigation }) => {
           </TouchableOpacity>
         </View>
 
-        {/* 5 KPI Metric Cards Carousel/Grid */}
+        {/* 5 Interactive KPI Metric Cards */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.kpiScrollView}>
-          <View style={styles.kpiCard}>
+          <TouchableOpacity
+            style={[
+              styles.kpiCard,
+              activeTab === 'institutions' && { borderColor: '#0f172a', borderWidth: 2, backgroundColor: '#f8fafc' },
+            ]}
+            activeOpacity={0.7}
+            onPress={() => {
+              setActiveTab('institutions');
+              setSearchQuery('');
+              setSelectedInstFilter('ALL');
+            }}
+          >
             <View style={styles.kpiHeader}>
               <Text style={styles.kpiLabel}>Universities</Text>
               <Ionicons name="business-outline" size={16} color="#64748b" />
             </View>
             <Text style={styles.kpiValue}>{institutionsList.length}</Text>
             <Text style={styles.kpiMeta}>Accredited institutions</Text>
-          </View>
+            <View style={styles.kpiFooter}>
+              <Text style={[styles.kpiActionText, { color: '#0f172a' }]}>View list ➔</Text>
+              {activeTab === 'institutions' && (
+                <View style={[styles.kpiActiveBadge, { backgroundColor: '#0f172a' }]}>
+                  <Text style={styles.kpiActiveBadgeText}>ACTIVE</Text>
+                </View>
+              )}
+            </View>
+          </TouchableOpacity>
 
-          <View style={styles.kpiCard}>
+          <TouchableOpacity
+            style={[
+              styles.kpiCard,
+              activeTab === 'students' && placementFilter === 'ALL' && { borderColor: '#0f172a', borderWidth: 2, backgroundColor: '#f8fafc' },
+            ]}
+            activeOpacity={0.7}
+            onPress={() => {
+              setActiveTab('students');
+              setPlacementFilter('ALL');
+              setSearchQuery('');
+              setSelectedInstFilter('ALL');
+            }}
+          >
             <View style={styles.kpiHeader}>
               <Text style={styles.kpiLabel}>Students</Text>
               <Ionicons name="people-outline" size={16} color="#64748b" />
             </View>
             <Text style={styles.kpiValue}>{analytics?.totalStudents ?? students.length}</Text>
             <Text style={styles.kpiMeta}>Nationwide enrolled</Text>
-          </View>
+            <View style={styles.kpiFooter}>
+              <Text style={[styles.kpiActionText, { color: '#0f172a' }]}>View roster ➔</Text>
+              {activeTab === 'students' && placementFilter === 'ALL' && (
+                <View style={[styles.kpiActiveBadge, { backgroundColor: '#0f172a' }]}>
+                  <Text style={styles.kpiActiveBadgeText}>ACTIVE</Text>
+                </View>
+              )}
+            </View>
+          </TouchableOpacity>
 
-          <View style={styles.kpiCard}>
+          <TouchableOpacity
+            style={[
+              styles.kpiCard,
+              activeTab === 'students' && placementFilter === 'PLACED' && { borderColor: '#059669', borderWidth: 2, backgroundColor: '#ecfdf5' },
+            ]}
+            activeOpacity={0.7}
+            onPress={() => {
+              setActiveTab('students');
+              setPlacementFilter('PLACED');
+              setSearchQuery('');
+              setSelectedInstFilter('ALL');
+            }}
+          >
             <View style={styles.kpiHeader}>
               <Text style={styles.kpiLabel}>Placements</Text>
-              <Ionicons name="briefcase-outline" size={16} color="#64748b" />
+              <Ionicons name="briefcase-outline" size={16} color="#059669" />
             </View>
-            <Text style={styles.kpiValue}>{analytics?.totalPlacements ?? 0}</Text>
+            <Text style={[styles.kpiValue, { color: '#059669' }]}>{analytics?.totalPlacements ?? placedCount}</Text>
             <Text style={styles.kpiMeta}>Active attachments</Text>
-          </View>
+            <View style={styles.kpiFooter}>
+              <Text style={[styles.kpiActionText, { color: '#059669' }]}>View placed ➔</Text>
+              {activeTab === 'students' && placementFilter === 'PLACED' && (
+                <View style={[styles.kpiActiveBadge, { backgroundColor: '#059669' }]}>
+                  <Text style={styles.kpiActiveBadgeText}>FILTERED</Text>
+                </View>
+              )}
+            </View>
+          </TouchableOpacity>
 
-          <View style={styles.kpiCard}>
+          <TouchableOpacity
+            style={[
+              styles.kpiCard,
+              activeTab === 'reports' && reportStatusFilter === 'PENDING' && { borderColor: '#b45309', borderWidth: 2, backgroundColor: '#fffbeb' },
+            ]}
+            activeOpacity={0.7}
+            onPress={() => {
+              setActiveTab('reports');
+              setReportStatusFilter('PENDING');
+              setSearchQuery('');
+              setSelectedInstFilter('ALL');
+            }}
+          >
             <View style={styles.kpiHeader}>
               <Text style={styles.kpiLabel}>Pending Stipends</Text>
               <Ionicons name="time-outline" size={16} color="#b45309" />
             </View>
             <Text style={[styles.kpiValue, { color: '#b45309' }]}>{pendingCount}</Text>
             <Text style={styles.kpiMeta}>Awaiting audit</Text>
-          </View>
+            <View style={styles.kpiFooter}>
+              <Text style={[styles.kpiActionText, { color: '#b45309' }]}>Audit queue ➔</Text>
+              {activeTab === 'reports' && reportStatusFilter === 'PENDING' && (
+                <View style={[styles.kpiActiveBadge, { backgroundColor: '#b45309' }]}>
+                  <Text style={styles.kpiActiveBadgeText}>QUEUE</Text>
+                </View>
+              )}
+            </View>
+          </TouchableOpacity>
 
-          <View style={styles.kpiCard}>
+          <TouchableOpacity
+            style={[
+              styles.kpiCard,
+              activeTab === 'reports' && reportStatusFilter === 'VERIFIED' && { borderColor: '#15803d', borderWidth: 2, backgroundColor: '#f0fdf4' },
+            ]}
+            activeOpacity={0.7}
+            onPress={() => {
+              setActiveTab('reports');
+              setReportStatusFilter('VERIFIED');
+              setSearchQuery('');
+              setSelectedInstFilter('ALL');
+            }}
+          >
             <View style={styles.kpiHeader}>
               <Text style={styles.kpiLabel}>Authorized</Text>
               <Ionicons name="checkmark-circle-outline" size={16} color="#15803d" />
             </View>
             <Text style={[styles.kpiValue, { color: '#15803d' }]}>{verifiedCount}</Text>
             <Text style={styles.kpiMeta}>Cleared for stipend</Text>
-          </View>
+            <View style={styles.kpiFooter}>
+              <Text style={[styles.kpiActionText, { color: '#15803d' }]}>Authorized ➔</Text>
+              {activeTab === 'reports' && reportStatusFilter === 'VERIFIED' && (
+                <View style={[styles.kpiActiveBadge, { backgroundColor: '#15803d' }]}>
+                  <Text style={styles.kpiActiveBadgeText}>CLEARED</Text>
+                </View>
+              )}
+            </View>
+          </TouchableOpacity>
         </ScrollView>
 
         {/* Search & Institution Filter Bar */}
@@ -755,6 +867,77 @@ const ItfHomeScreen = ({ navigation }) => {
                 );
               })}
             </ScrollView>
+
+            {/* Quick Sub-Filter Pills */}
+            {activeTab === 'reports' && (
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 8 }}>
+                <TouchableOpacity
+                  style={[styles.subFilterPill, reportStatusFilter === 'ALL' && styles.subFilterPillActive]}
+                  onPress={() => setReportStatusFilter('ALL')}
+                >
+                  <Text style={[styles.subFilterPillText, reportStatusFilter === 'ALL' && styles.subFilterPillTextActive]}>
+                    All ({finalReports.length})
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    styles.subFilterPill,
+                    reportStatusFilter === 'PENDING' && { backgroundColor: '#b45309', borderColor: '#b45309' },
+                  ]}
+                  onPress={() => setReportStatusFilter('PENDING')}
+                >
+                  <Text style={[styles.subFilterPillText, reportStatusFilter === 'PENDING' && { color: '#ffffff' }]}>
+                    Pending Audit ({pendingCount})
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    styles.subFilterPill,
+                    reportStatusFilter === 'VERIFIED' && { backgroundColor: '#15803d', borderColor: '#15803d' },
+                  ]}
+                  onPress={() => setReportStatusFilter('VERIFIED')}
+                >
+                  <Text style={[styles.subFilterPillText, reportStatusFilter === 'VERIFIED' && { color: '#ffffff' }]}>
+                    Authorized ({verifiedCount})
+                  </Text>
+                </TouchableOpacity>
+              </ScrollView>
+            )}
+
+            {activeTab === 'students' && (
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 8 }}>
+                <TouchableOpacity
+                  style={[styles.subFilterPill, placementFilter === 'ALL' && styles.subFilterPillActive]}
+                  onPress={() => setPlacementFilter('ALL')}
+                >
+                  <Text style={[styles.subFilterPillText, placementFilter === 'ALL' && styles.subFilterPillTextActive]}>
+                    All ({students.length})
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    styles.subFilterPill,
+                    placementFilter === 'PLACED' && { backgroundColor: '#059669', borderColor: '#059669' },
+                  ]}
+                  onPress={() => setPlacementFilter('PLACED')}
+                >
+                  <Text style={[styles.subFilterPillText, placementFilter === 'PLACED' && { color: '#ffffff' }]}>
+                    Placed ({placedCount})
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    styles.subFilterPill,
+                    placementFilter === 'UNPLACED' && { backgroundColor: '#64748b', borderColor: '#64748b' },
+                  ]}
+                  onPress={() => setPlacementFilter('UNPLACED')}
+                >
+                  <Text style={[styles.subFilterPillText, placementFilter === 'UNPLACED' && { color: '#ffffff' }]}>
+                    Awaiting Placement ({unplacedCount})
+                  </Text>
+                </TouchableOpacity>
+              </ScrollView>
+            )}
           </View>
         )}
 
@@ -1169,6 +1352,29 @@ const styles = StyleSheet.create({
     color: '#94a3b8',
     marginTop: 2,
   },
+  kpiFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 8,
+    paddingTop: 6,
+    borderTopWidth: 1,
+    borderTopColor: '#f1f5f9',
+  },
+  kpiActionText: {
+    fontSize: 10,
+    fontWeight: '700',
+  },
+  kpiActiveBadge: {
+    paddingHorizontal: 4,
+    paddingVertical: 1,
+    borderRadius: 3,
+  },
+  kpiActiveBadgeText: {
+    fontSize: 8,
+    fontWeight: '800',
+    color: '#ffffff',
+  },
   filterBar: {
     paddingHorizontal: 16,
     marginBottom: 10,
@@ -1214,6 +1420,27 @@ const styles = StyleSheet.create({
     color: '#475569',
   },
   instChipTextActive: {
+    color: '#ffffff',
+  },
+  subFilterPill: {
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 14,
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#cbd5e1',
+    marginRight: 6,
+  },
+  subFilterPillActive: {
+    backgroundColor: '#0f172a',
+    borderColor: '#0f172a',
+  },
+  subFilterPillText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#475569',
+  },
+  subFilterPillTextActive: {
     color: '#ffffff',
   },
   tabsScrollView: {
