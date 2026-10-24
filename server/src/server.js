@@ -95,8 +95,35 @@ app.get('/', (req, res) => {
   });
 });
 
+app.get('/api/v1', (req, res) => {
+  res.status(200).json({
+    status: 'online',
+    message: 'SIWES Activity Tracking System REST API v1',
+    frontend: process.env.FRONTEND_URL || 'https://sats-sooty.vercel.app',
+    endpoints: {
+      auth: '/api/v1/auth',
+      institutions: '/api/v1/institutions',
+      students: '/api/v1/students',
+      logs: '/api/v1/logs',
+      placements: '/api/v1/placements',
+      visits: '/api/v1/visits',
+      analytics: '/api/v1/analytics',
+      reports: '/api/v1/reports',
+      notifications: '/api/v1/notifications',
+    }
+  });
+});
+
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'healthy', timestamp: new Date().toISOString() });
+});
+
+// Fallback 404 Handler for undefined routes
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: `Cannot ${req.method} ${req.originalUrl}. This is a backend REST API service. Please use the frontend web application at ${process.env.FRONTEND_URL || 'https://sats-sooty.vercel.app'}`
+  });
 });
 
 // Global Error Handler
