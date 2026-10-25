@@ -186,24 +186,24 @@ const Login = () => {
         </div>
 
         <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: '16px' }}>
-            <label style={{ fontSize: '0.875rem', fontWeight: 500, display: 'block', marginBottom: '8px' }}>Select Role</label>
-            <div className="role-grid">
+          <div className="input-group">
+            <label htmlFor="login-role">Select Role</label>
+            <select
+              id="login-role"
+              className="select-field"
+              value={selectedRole.id}
+              onChange={(e) => {
+                const found = roles.find(r => r.id === e.target.value);
+                if (found) setSelectedRole(found);
+              }}
+              style={{ width: '100%', height: '42px', fontSize: '0.875rem' }}
+            >
               {roles.map(role => (
-                <div 
-                  key={role.id} 
-                  id={`role-btn-${role.id}`}
-                  className={`role-card ${selectedRole.id === role.id ? 'selected' : ''}`}
-                  onClick={() => setSelectedRole(role)}
-                >
-                  <div className="role-card-radio"></div>
-                  <span style={{ fontSize: '0.875rem', fontWeight: 500 }}>{role.label}</span>
-                </div>
+                <option key={role.id} value={role.id}>
+                  {role.label}
+                </option>
               ))}
-            </div>
-            <div style={{ marginTop: '10px', fontSize: '0.8rem' }}>
-              <span style={{ color: 'var(--text-muted)' }}>Signing in as: <strong style={{ color: 'var(--text-main)' }}>{selectedRole.label}</strong></span>
-            </div>
+            </select>
           </div>
 
           <div className="input-group">
