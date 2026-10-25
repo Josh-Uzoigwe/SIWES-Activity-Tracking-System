@@ -6,19 +6,9 @@ import api from '../services/api';
 import { XCircle, CheckCircle, AlertCircle, ArrowLeft } from 'lucide-react';
 import ThemeToggle from '../components/ThemeToggle';
 
-const roles = [
-  { id: 'student', label: 'Student', type: 'student', role: 'STUDENT' },
-  { id: 'school', label: 'School Supervisor', type: 'supervisor', role: 'SCHOOL' },
-  { id: 'industry', label: 'Industry Supervisor', type: 'supervisor', role: 'INDUSTRY' },
-  { id: 'coordinator', label: 'Coordinator', type: 'supervisor', role: 'COORDINATOR' },
-  { id: 'itf', label: 'ITF Officer', type: 'supervisor', role: 'ITF' },
-];
-
-
 const Login = () => {
   const { user, login, loginWithGoogleData } = useContext(AuthContext);
   const navigate = useNavigate();
-  const [selectedRole, setSelectedRole] = useState(roles[0]);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -54,7 +44,7 @@ const Login = () => {
     setError('');
     setLoading(true);
     try {
-      await login(email, password, selectedRole.type, selectedRole.role);
+      await login(email, password);
       navigate('/dashboard');
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed. Check your credentials.');
@@ -189,26 +179,6 @@ const Login = () => {
         </div>
 
         <form onSubmit={handleSubmit}>
-          <div className="input-group">
-            <label htmlFor="login-role">Select Role</label>
-            <select
-              id="login-role"
-              className="select-field"
-              value={selectedRole.id}
-              onChange={(e) => {
-                const found = roles.find(r => r.id === e.target.value);
-                if (found) setSelectedRole(found);
-              }}
-              style={{ width: '100%', height: '42px', fontSize: '0.875rem' }}
-            >
-              {roles.map(role => (
-                <option key={role.id} value={role.id}>
-                  {role.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
           <div className="input-group">
             <label htmlFor="login-email">Email Address</label>
             <input 

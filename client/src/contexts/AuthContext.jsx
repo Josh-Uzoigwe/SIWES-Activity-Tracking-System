@@ -18,7 +18,7 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  const login = async (email, password, loginType, expectedRole) => {
+  const login = async (email, password, loginType = 'student', expectedRole) => {
     const res = await api.post('/auth/login', { 
       email, 
       password, 
