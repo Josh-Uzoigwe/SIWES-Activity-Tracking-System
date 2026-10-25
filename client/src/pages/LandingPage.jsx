@@ -261,7 +261,7 @@ const LandingPage = () => {
                 WebkitTextFillColor: 'transparent'
               }}
             >
-              SIWES Logbook Tracking
+              SIWES Activity Tracking
             </span>
           </h1>
 
@@ -275,8 +275,8 @@ const LandingPage = () => {
               lineHeight: 1.6
             }}
           >
-            Eliminating lost paper logbooks, backdated entries, and stipend delays with tamper-proof daily entries,
-            two-tier academic and industrial supervision, and automated ITF compliance auditing.
+            Eliminating lost paper logbooks, backdated entries, and stipend delays with tamper-proof daily activity logs,
+            place of attachment self-registration, two-tier supervision, and automated ITF compliance auditing.
           </p>
 
           {/* CTAs */}
@@ -850,7 +850,7 @@ const LandingPage = () => {
             Grounded in the Industrial Training Fund (ITF) Mandate
           </h2>
           <p style={{ color: '#94a3b8', maxWidth: '720px', margin: '0 auto 32px', fontSize: '0.95rem', lineHeight: 1.6 }}>
-            Designed to fulfill the statutory requirements of the Industrial Training Fund Act, providing tertiary institutions across Nigeria with an auditable, secure, and standardized electronic logbook platform.
+            Designed to fulfill the statutory requirements of the Industrial Training Fund Act, providing tertiary institutions across Nigeria with an auditable, secure, and standardized electronic activity tracking platform.
           </p>
 
           <div style={{ display: 'flex', justifyContent: 'center', gap: '32px', flexWrap: 'wrap', color: '#cbd5e1', fontSize: '0.85rem' }}>
@@ -874,7 +874,7 @@ const LandingPage = () => {
             Ready to Begin Your SIWES Journey?
           </h2>
           <p style={{ color: '#64748b', fontSize: '1.05rem', marginBottom: '32px', lineHeight: 1.5 }}>
-            Access your logbook, coordinate institutional clearances, or inspect company placements through the official portal.
+            Access your activity tracking portal, coordinate institutional clearances, or inspect company placements through the official portal.
           </p>
           <div style={{ display: 'flex', justifyContent: 'center', gap: '14px', flexWrap: 'wrap' }}>
             <Link

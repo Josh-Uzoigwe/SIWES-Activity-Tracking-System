@@ -151,7 +151,7 @@ const Login = () => {
 
         <div style={{ marginBottom: '24px' }}>
           <h1 style={{ fontSize: '1.5rem', marginBottom: '8px' }}>Sign in to SIWES Tracker</h1>
-          <p>Access your industrial training logbook and supervision portal.</p>
+          <p>Access your industrial training activity tracking and supervision portal.</p>
         </div>
 
         {error && (
