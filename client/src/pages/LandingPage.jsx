@@ -319,7 +319,6 @@ const LandingPage = () => {
                 boxShadow: '0 2px 6px rgba(0, 0, 0, 0.04)'
               }}
             >
-              <GraduationCap size={18} />
               Register as Student
             </Link>
           </div>
@@ -337,18 +336,21 @@ const LandingPage = () => {
             <div
               style={{
                 padding: '18px 20px',
-                backgroundColor: '#f8fafc',
+                backgroundColor: '#ffffff',
                 border: '1px solid #e2e8f0',
-                borderRadius: '10px'
+                borderTop: '2.5px solid #047857',
+                borderRadius: '8px',
+                boxShadow: '0 1px 3px rgba(15, 23, 42, 0.04)'
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
-                <div style={{ width: 28, height: 28, borderRadius: '6px', backgroundColor: '#e0f2fe', color: '#0284c7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Clock size={16} />
-                </div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
                 <span style={{ fontWeight: 700, fontSize: '0.9rem', color: '#0f172a' }}>3-Day Window</span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '0.68rem', fontWeight: 700, color: '#047857', letterSpacing: '0.04em' }}>
+                  <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: '#10b981' }}></span>
+                  72H LOCK
+                </span>
               </div>
-              <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0, lineHeight: 1.4 }}>
+              <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0, lineHeight: 1.45 }}>
                 Prevents retroactive falsification by enforcing log submissions within 72 hours.
               </p>
             </div>
@@ -356,18 +358,21 @@ const LandingPage = () => {
             <div
               style={{
                 padding: '18px 20px',
-                backgroundColor: '#f8fafc',
+                backgroundColor: '#ffffff',
                 border: '1px solid #e2e8f0',
-                borderRadius: '10px'
+                borderTop: '2.5px solid #0284c7',
+                borderRadius: '8px',
+                boxShadow: '0 1px 3px rgba(15, 23, 42, 0.04)'
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
-                <div style={{ width: 28, height: 28, borderRadius: '6px', backgroundColor: '#dcfce7', color: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <ShieldCheck size={16} />
-                </div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
                 <span style={{ fontWeight: 700, fontSize: '0.9rem', color: '#0f172a' }}>Dual Endorsements</span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '0.68rem', fontWeight: 700, color: '#0284c7', letterSpacing: '0.04em' }}>
+                  <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: '#0ea5e9' }}></span>
+                  2-TIER SIGN-OFF
+                </span>
               </div>
-              <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0, lineHeight: 1.4 }}>
+              <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0, lineHeight: 1.45 }}>
                 Requires both School Supervisor and Industry Trainer verification.
               </p>
             </div>
@@ -375,18 +380,21 @@ const LandingPage = () => {
             <div
               style={{
                 padding: '18px 20px',
-                backgroundColor: '#f8fafc',
+                backgroundColor: '#ffffff',
                 border: '1px solid #e2e8f0',
-                borderRadius: '10px'
+                borderTop: '2.5px solid #7c3aed',
+                borderRadius: '8px',
+                boxShadow: '0 1px 3px rgba(15, 23, 42, 0.04)'
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
-                <div style={{ width: 28, height: 28, borderRadius: '6px', backgroundColor: '#fae8ff', color: '#a855f7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Download size={16} />
-                </div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
                 <span style={{ fontWeight: 700, fontSize: '0.9rem', color: '#0f172a' }}>Instant PDF Export</span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '0.68rem', fontWeight: 700, color: '#7c3aed', letterSpacing: '0.04em' }}>
+                  <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: '#a855f7' }}></span>
+                  ITF STANDARD
+                </span>
               </div>
-              <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0, lineHeight: 1.4 }}>
+              <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0, lineHeight: 1.45 }}>
                 Generates a standardized, printable official logbook ready for institutional defense.
               </p>
             </div>
@@ -394,18 +402,21 @@ const LandingPage = () => {
             <div
               style={{
                 padding: '18px 20px',
-                backgroundColor: '#f8fafc',
+                backgroundColor: '#ffffff',
                 border: '1px solid #e2e8f0',
-                borderRadius: '10px'
+                borderTop: '2.5px solid #d97706',
+                borderRadius: '8px',
+                boxShadow: '0 1px 3px rgba(15, 23, 42, 0.04)'
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
-                <div style={{ width: 28, height: 28, borderRadius: '6px', backgroundColor: '#fef3c7', color: '#d97706', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Building2 size={16} />
-                </div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
                 <span style={{ fontWeight: 700, fontSize: '0.9rem', color: '#0f172a' }}>Vetted Clearance</span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '0.68rem', fontWeight: 700, color: '#d97706', letterSpacing: '0.04em' }}>
+                  <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: '#f59e0b' }}></span>
+                  COORDINATOR GATE
+                </span>
               </div>
-              <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0, lineHeight: 1.4 }}>
+              <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0, lineHeight: 1.45 }}>
                 Guarantees students are verified by their university coordinator before logging.
               </p>
             </div>
@@ -526,67 +537,97 @@ const LandingPage = () => {
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px' }}>
             {/* Feature 1 */}
-            <div style={{ padding: '28px', borderRadius: '10px', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc' }}>
-              <div style={{ width: 42, height: 42, borderRadius: '8px', backgroundColor: '#0f172a', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
-                <Clock size={22} />
+            <div style={{ padding: '28px', borderRadius: '10px', border: '1px solid #e2e8f0', backgroundColor: '#ffffff', boxShadow: '0 1px 3px rgba(15, 23, 42, 0.03)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+                <span style={{ fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace', fontSize: '0.75rem', fontWeight: 700, color: '#047857', letterSpacing: '0.06em' }}>
+                  01 // AUDIT TIMELOCK
+                </span>
+                <span style={{ fontSize: '0.7rem', fontWeight: 600, padding: '3px 8px', borderRadius: '4px', backgroundColor: '#ecfdf5', color: '#047857', border: '1px solid #a7f3d0' }}>
+                  IMMUTABLE
+                </span>
               </div>
-              <h3 style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '8px' }}>Tamper-Evident Daily Logging</h3>
-              <p style={{ fontSize: '0.875rem', color: '#64748b', lineHeight: 1.5 }}>
+              <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#0f172a', marginBottom: '8px' }}>Tamper-Evident Daily Logging</h3>
+              <p style={{ fontSize: '0.875rem', color: '#64748b', lineHeight: 1.55, margin: 0 }}>
                 Students submit entries with skills acquired and photographic evidence. The server-enforced 3-day window prevents backfilling missed weeks.
               </p>
             </div>
 
             {/* Feature 2 */}
-            <div style={{ padding: '28px', borderRadius: '10px', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc' }}>
-              <div style={{ width: 42, height: 42, borderRadius: '8px', backgroundColor: '#059669', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
-                <ShieldCheck size={22} />
+            <div style={{ padding: '28px', borderRadius: '10px', border: '1px solid #e2e8f0', backgroundColor: '#ffffff', boxShadow: '0 1px 3px rgba(15, 23, 42, 0.03)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+                <span style={{ fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace', fontSize: '0.75rem', fontWeight: 700, color: '#0284c7', letterSpacing: '0.06em' }}>
+                  02 // DUAL ENDORSEMENT
+                </span>
+                <span style={{ fontSize: '0.7rem', fontWeight: 600, padding: '3px 8px', borderRadius: '4px', backgroundColor: '#f0f9ff', color: '#0284c7', border: '1px solid #bae6fd' }}>
+                  DUAL SIGN-OFF
+                </span>
               </div>
-              <h3 style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '8px' }}>Two-Tier Supervisory Pipeline</h3>
-              <p style={{ fontSize: '0.875rem', color: '#64748b', lineHeight: 1.5 }}>
+              <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#0f172a', marginBottom: '8px' }}>Two-Tier Supervisory Pipeline</h3>
+              <p style={{ fontSize: '0.875rem', color: '#64748b', lineHeight: 1.55, margin: 0 }}>
                 Industry supervisors sign off on technical execution and workplace diligence, while school supervisors validate academic relevance.
               </p>
             </div>
 
             {/* Feature 3 */}
-            <div style={{ padding: '28px', borderRadius: '10px', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc' }}>
-              <div style={{ width: 42, height: 42, borderRadius: '8px', backgroundColor: '#2563eb', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
-                <Building2 size={22} />
+            <div style={{ padding: '28px', borderRadius: '10px', border: '1px solid #e2e8f0', backgroundColor: '#ffffff', boxShadow: '0 1px 3px rgba(15, 23, 42, 0.03)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+                <span style={{ fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace', fontSize: '0.75rem', fontWeight: 700, color: '#6366f1', letterSpacing: '0.06em' }}>
+                  03 // CLEARANCE GATE
+                </span>
+                <span style={{ fontSize: '0.7rem', fontWeight: 600, padding: '3px 8px', borderRadius: '4px', backgroundColor: '#eef2ff', color: '#4f46e5', border: '1px solid #c7d2fe' }}>
+                  PREREQUISITE
+                </span>
               </div>
-              <h3 style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '8px' }}>Institutional Clearance Control</h3>
-              <p style={{ fontSize: '0.875rem', color: '#64748b', lineHeight: 1.5 }}>
+              <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#0f172a', marginBottom: '8px' }}>Institutional Clearance Control</h3>
+              <p style={{ fontSize: '0.875rem', color: '#64748b', lineHeight: 1.55, margin: 0 }}>
                 University coordinators must vet student profiles and approve institutional clearance before activity logging is unlocked.
               </p>
             </div>
 
             {/* Feature 4 */}
-            <div style={{ padding: '28px', borderRadius: '10px', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc' }}>
-              <div style={{ width: 42, height: 42, borderRadius: '8px', backgroundColor: '#7c3aed', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
-                <Calendar size={22} />
+            <div style={{ padding: '28px', borderRadius: '10px', border: '1px solid #e2e8f0', backgroundColor: '#ffffff', boxShadow: '0 1px 3px rgba(15, 23, 42, 0.03)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+                <span style={{ fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace', fontSize: '0.75rem', fontWeight: 700, color: '#7c3aed', letterSpacing: '0.06em' }}>
+                  04 // SITE VERIFICATION
+                </span>
+                <span style={{ fontSize: '0.7rem', fontWeight: 600, padding: '3px 8px', borderRadius: '4px', backgroundColor: '#f5f3ff', color: '#7c3aed', border: '1px solid #ddd6fe' }}>
+                  FIELD VISITS
+                </span>
               </div>
-              <h3 style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '8px' }}>On-Site Inspection Visits</h3>
-              <p style={{ fontSize: '0.875rem', color: '#64748b', lineHeight: 1.5 }}>
+              <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#0f172a', marginBottom: '8px' }}>On-Site Inspection Visits</h3>
+              <p style={{ fontSize: '0.875rem', color: '#64748b', lineHeight: 1.55, margin: 0 }}>
                 School supervisors record physical company inspection visits, documenting student physical attendance, workstation safety, and notes.
               </p>
             </div>
 
             {/* Feature 5 */}
-            <div style={{ padding: '28px', borderRadius: '10px', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc' }}>
-              <div style={{ width: 42, height: 42, borderRadius: '8px', backgroundColor: '#d97706', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
-                <FileText size={22} />
+            <div style={{ padding: '28px', borderRadius: '10px', border: '1px solid #e2e8f0', backgroundColor: '#ffffff', boxShadow: '0 1px 3px rgba(15, 23, 42, 0.03)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+                <span style={{ fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace', fontSize: '0.75rem', fontWeight: 700, color: '#d97706', letterSpacing: '0.06em' }}>
+                  05 // STANDARDIZED REPORT
+                </span>
+                <span style={{ fontSize: '0.7rem', fontWeight: 600, padding: '3px 8px', borderRadius: '4px', backgroundColor: '#fffbeb', color: '#b45309', border: '1px solid #fde68a' }}>
+                  AUTO-COMPILED
+                </span>
               </div>
-              <h3 style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '8px' }}>Automated PDF Logbook</h3>
-              <p style={{ fontSize: '0.875rem', color: '#64748b', lineHeight: 1.5 }}>
+              <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#0f172a', marginBottom: '8px' }}>Automated PDF Logbook</h3>
+              <p style={{ fontSize: '0.875rem', color: '#64748b', lineHeight: 1.55, margin: 0 }}>
                 Students, supervisors, and coordinators can generate a complete, formatted official PDF logbook compilation with review comments.
               </p>
             </div>
 
             {/* Feature 6 */}
-            <div style={{ padding: '28px', borderRadius: '10px', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc' }}>
-              <div style={{ width: 42, height: 42, borderRadius: '8px', backgroundColor: '#0f172a', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
-                <Award size={22} />
+            <div style={{ padding: '28px', borderRadius: '10px', border: '1px solid #e2e8f0', backgroundColor: '#ffffff', boxShadow: '0 1px 3px rgba(15, 23, 42, 0.03)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+                <span style={{ fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace', fontSize: '0.75rem', fontWeight: 700, color: '#0f172a', letterSpacing: '0.06em' }}>
+                  06 // NATIONAL GOVERNANCE
+                </span>
+                <span style={{ fontSize: '0.7rem', fontWeight: 600, padding: '3px 8px', borderRadius: '4px', backgroundColor: '#f1f5f9', color: '#0f172a', border: '1px solid #cbd5e1' }}>
+                  ITF AUDIT
+                </span>
               </div>
-              <h3 style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '8px' }}>ITF National Directorate Oversight</h3>
-              <p style={{ fontSize: '0.875rem', color: '#64748b', lineHeight: 1.5 }}>
+              <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#0f172a', marginBottom: '8px' }}>ITF National Directorate Oversight</h3>
+              <p style={{ fontSize: '0.875rem', color: '#64748b', lineHeight: 1.55, margin: 0 }}>
                 Dedicated national portal for ITF officers to onboard accredited universities, review compliance metrics, and approve student stipends.
               </p>
             </div>
@@ -611,97 +652,92 @@ const LandingPage = () => {
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px' }}>
             {/* Student */}
-            <div style={{ backgroundColor: '#ffffff', borderRadius: '10px', padding: '24px', border: '1px solid #e2e8f0' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
-                <div style={{ width: 34, height: 34, borderRadius: '6px', backgroundColor: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0f172a' }}>
-                  <GraduationCap size={18} />
+            <div style={{ backgroundColor: '#ffffff', borderRadius: '10px', padding: '24px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxShadow: '0 1px 3px rgba(15, 23, 42, 0.03)' }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px', gap: '8px' }}>
+                  <h4 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, color: '#0f172a' }}>Students</h4>
+                  <span style={{ fontSize: '0.72rem', fontWeight: 600, padding: '3px 10px', borderRadius: '999px', backgroundColor: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe' }}>
+                    Tertiary Candidates
+                  </span>
                 </div>
-                <div>
-                  <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 700 }}>Students</h4>
-                  <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Tertiary Candidates</span>
-                </div>
+                <p style={{ fontSize: '0.875rem', color: '#475569', marginBottom: '18px', lineHeight: 1.55 }}>
+                  Submit daily logs, upload photographic evidence, review supervisor corrections, and submit technical reports for stipend clearance.
+                </p>
               </div>
-              <p style={{ fontSize: '0.85rem', color: '#475569', marginBottom: '14px', lineHeight: 1.5 }}>
-                Submit daily logs, upload photographic evidence, review supervisor corrections, and submit technical reports for stipend clearance.
-              </p>
-              <Link to="/register" style={{ fontSize: '0.8rem', fontWeight: 600, color: '#0f172a', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                Register as Student <ChevronRight size={13} />
+              <Link to="/register" style={{ fontSize: '0.825rem', fontWeight: 600, color: '#0f172a', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                Register as Student <ChevronRight size={14} />
               </Link>
             </div>
 
             {/* School Supervisor */}
-            <div style={{ backgroundColor: '#ffffff', borderRadius: '10px', padding: '24px', border: '1px solid #e2e8f0' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
-                <div style={{ width: 34, height: 34, borderRadius: '6px', backgroundColor: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0f172a' }}>
-                  <Users size={18} />
+            <div style={{ backgroundColor: '#ffffff', borderRadius: '10px', padding: '24px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxShadow: '0 1px 3px rgba(15, 23, 42, 0.03)' }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px', gap: '8px' }}>
+                  <h4 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, color: '#0f172a' }}>School Supervisors</h4>
+                  <span style={{ fontSize: '0.72rem', fontWeight: 600, padding: '3px 10px', borderRadius: '999px', backgroundColor: '#ecfdf5', color: '#047857', border: '1px solid #a7f3d0' }}>
+                    Academic Faculty
+                  </span>
                 </div>
-                <div>
-                  <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 700 }}>School Supervisors</h4>
-                  <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Academic Faculty</span>
-                </div>
+                <p style={{ fontSize: '0.875rem', color: '#475569', marginBottom: '18px', lineHeight: 1.55 }}>
+                  Approve or reject student logs with feedback, track student competencies, and document physical supervisory site visits.
+                </p>
               </div>
-              <p style={{ fontSize: '0.85rem', color: '#475569', marginBottom: '14px', lineHeight: 1.5 }}>
-                Approve or reject student logs with feedback, track student competencies, and document physical supervisory site visits.
-              </p>
-              <Link to="/login" style={{ fontSize: '0.8rem', fontWeight: 600, color: '#0f172a', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                Supervisor Sign In <ChevronRight size={13} />
+              <Link to="/login" style={{ fontSize: '0.825rem', fontWeight: 600, color: '#0f172a', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                Supervisor Sign In <ChevronRight size={14} />
               </Link>
             </div>
 
             {/* Industry Supervisor */}
-            <div style={{ backgroundColor: '#ffffff', borderRadius: '10px', padding: '24px', border: '1px solid #e2e8f0' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
-                <div style={{ width: 34, height: 34, borderRadius: '6px', backgroundColor: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0f172a' }}>
-                  <Briefcase size={18} />
+            <div style={{ backgroundColor: '#ffffff', borderRadius: '10px', padding: '24px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxShadow: '0 1px 3px rgba(15, 23, 42, 0.03)' }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px', gap: '8px' }}>
+                  <h4 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, color: '#0f172a' }}>Industry Supervisors</h4>
+                  <span style={{ fontSize: '0.72rem', fontWeight: 600, padding: '3px 10px', borderRadius: '999px', backgroundColor: '#f8fafc', color: '#334155', border: '1px solid #cbd5e1' }}>
+                    Workplace Mentors
+                  </span>
                 </div>
-                <div>
-                  <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 700 }}>Industry Supervisors</h4>
-                  <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Workplace Mentors</span>
-                </div>
+                <p style={{ fontSize: '0.875rem', color: '#475569', marginBottom: '18px', lineHeight: 1.55 }}>
+                  Verify practical industrial tasks completed at the company, check weekly attendance, and provide official industry endorsements.
+                </p>
               </div>
-              <p style={{ fontSize: '0.85rem', color: '#475569', marginBottom: '14px', lineHeight: 1.5 }}>
-                Verify practical industrial tasks completed at the company, check weekly attendance, and provide official industry endorsements.
-              </p>
-              <Link to="/login" style={{ fontSize: '0.8rem', fontWeight: 600, color: '#0f172a', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                Industry Sign In <ChevronRight size={13} />
+              <Link to="/login" style={{ fontSize: '0.825rem', fontWeight: 600, color: '#0f172a', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                Industry Sign In <ChevronRight size={14} />
               </Link>
             </div>
 
             {/* Coordinator */}
-            <div style={{ backgroundColor: '#ffffff', borderRadius: '10px', padding: '24px', border: '1px solid #e2e8f0' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
-                <div style={{ width: 34, height: 34, borderRadius: '6px', backgroundColor: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0f172a' }}>
-                  <Building2 size={18} />
+            <div style={{ backgroundColor: '#ffffff', borderRadius: '10px', padding: '24px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxShadow: '0 1px 3px rgba(15, 23, 42, 0.03)' }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px', gap: '8px' }}>
+                  <h4 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, color: '#0f172a' }}>SIWES Coordinators</h4>
+                  <span style={{ fontSize: '0.72rem', fontWeight: 600, padding: '3px 10px', borderRadius: '999px', backgroundColor: '#eef2ff', color: '#4338ca', border: '1px solid #c7d2fe' }}>
+                    University Directorate
+                  </span>
                 </div>
-                <div>
-                  <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 700 }}>SIWES Coordinators</h4>
-                  <span style={{ fontSize: '0.75rem', color: '#64748b' }}>University Directorate</span>
-                </div>
+                <p style={{ fontSize: '0.875rem', color: '#475569', marginBottom: '18px', lineHeight: 1.55 }}>
+                  Vet candidate registrations, manage company placement assignments, assign university supervisors, and certify institutional completion.
+                </p>
               </div>
-              <p style={{ fontSize: '0.85rem', color: '#475569', marginBottom: '14px', lineHeight: 1.5 }}>
-                Vet candidate registrations, manage company placement assignments, assign university supervisors, and certify institutional completion.
-              </p>
-              <Link to="/login" style={{ fontSize: '0.8rem', fontWeight: 600, color: '#0f172a', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                Coordinator Portal <ChevronRight size={13} />
+              <Link to="/login" style={{ fontSize: '0.825rem', fontWeight: 600, color: '#0f172a', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                Coordinator Portal <ChevronRight size={14} />
               </Link>
             </div>
 
             {/* ITF Officer */}
-            <div style={{ backgroundColor: '#ffffff', borderRadius: '10px', padding: '24px', border: '1px solid #e2e8f0' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
-                <div style={{ width: 34, height: 34, borderRadius: '6px', backgroundColor: '#0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ffffff' }}>
-                  <ShieldCheck size={18} />
+            <div style={{ backgroundColor: '#ffffff', borderRadius: '10px', padding: '24px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxShadow: '0 1px 3px rgba(15, 23, 42, 0.03)' }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px', gap: '8px' }}>
+                  <h4 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, color: '#0f172a' }}>ITF Officers</h4>
+                  <span style={{ fontSize: '0.72rem', fontWeight: 600, padding: '3px 10px', borderRadius: '999px', backgroundColor: '#0f172a', color: '#ffffff' }}>
+                    National Directorate
+                  </span>
                 </div>
-                <div>
-                  <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 700 }}>ITF Officers</h4>
-                  <span style={{ fontSize: '0.75rem', color: '#64748b' }}>National Directorate</span>
-                </div>
+                <p style={{ fontSize: '0.875rem', color: '#475569', marginBottom: '18px', lineHeight: 1.55 }}>
+                  National compliance dashboard: onboard accredited tertiary institutions, inspect digital logbooks, and verify student stipend eligibility.
+                </p>
               </div>
-              <p style={{ fontSize: '0.85rem', color: '#475569', marginBottom: '14px', lineHeight: 1.5 }}>
-                National compliance dashboard: onboard accredited tertiary institutions, inspect digital logbooks, and verify student stipend eligibility.
-              </p>
-              <Link to="/login" style={{ fontSize: '0.8rem', fontWeight: 600, color: '#0f172a', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                ITF Officer Sign In <ChevronRight size={13} />
+              <Link to="/login" style={{ fontSize: '0.825rem', fontWeight: 600, color: '#0f172a', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                ITF Officer Sign In <ChevronRight size={14} />
               </Link>
             </div>
           </div>
