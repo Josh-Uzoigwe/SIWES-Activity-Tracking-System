@@ -55,6 +55,66 @@ describe('API Security and Flow Tests', () => {
       expect(res.body.accessToken).toBeDefined();
       expect(res.body.user.role).toBe('STUDENT');
     });
+
+    it('should return generic 401 without leaking role when email is registered under another role with wrong password', async () => {
+      // Mock student not found, but supervisor found with different password
+      prisma.student.findUnique.mockResolvedValue(null);
+      const hashedPassword = await bcrypt.hash('correctPassword', 10);
+      prisma.supervisor.findUnique.mockResolvedValue({
+        supervisor_id: 10,
+        email: 'coordinator@unn.edu.ng',
+        password_hash: hashedPassword,
+        role: 'COORDINATOR',
+        full_name: 'Dr. Coordinator'
+      });
+
+      const res = await request(app)
+        .post('/api/v1/auth/login')
+        .send({ email: 'coordinator@unn.edu.ng', password: 'wrongPassword', login_type: 'student' });
+
+      expect(res.statusCode).toBe(401);
+      expect(res.body.success).toBe(false);
+      expect(res.body.message).toBe('Invalid email or password');
+      // Verify no mention of Coordinator or Role mismatch
+      expect(JSON.stringify(res.body)).not.toContain('Coordinator');
+      expect(JSON.stringify(res.body)).not.toContain('Role mismatch');
+    });
+
+    it('should return generic 401 when email does not exist in any table', async () => {
+      prisma.student.findUnique.mockResolvedValue(null);
+      prisma.supervisor.findUnique.mockResolvedValue(null);
+
+      const res = await request(app)
+        .post('/api/v1/auth/login')
+        .send({ email: 'nonexistent@test.com', password: 'password123', login_type: 'student' });
+
+      expect(res.statusCode).toBe(401);
+      expect(res.body.success).toBe(false);
+      expect(res.body.message).toBe('Invalid email or password');
+    });
+
+    it('should seamlessly login supervisor when password is valid even if login_type was student', async () => {
+      prisma.student.findUnique.mockResolvedValue(null);
+      const hashedPassword = await bcrypt.hash('validCoordinatorPass', 10);
+      prisma.supervisor.findUnique.mockResolvedValue({
+        supervisor_id: 15,
+        email: 'coordinator@unn.edu.ng',
+        password_hash: hashedPassword,
+        role: 'COORDINATOR',
+        full_name: 'Dr. UNN Coordinator',
+        institution: 'University of Nigeria, Nsukka'
+      });
+
+      const res = await request(app)
+        .post('/api/v1/auth/login')
+        .send({ email: 'coordinator@unn.edu.ng', password: 'validCoordinatorPass', login_type: 'student' });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.accessToken).toBeDefined();
+      expect(res.body.user.role).toBe('COORDINATOR');
+      expect(res.body.user.email).toBe('coordinator@unn.edu.ng');
+    });
   });
 
   describe('RBAC Boundary Tests', () => {

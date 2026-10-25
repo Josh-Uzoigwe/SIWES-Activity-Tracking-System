@@ -131,64 +131,52 @@ exports.login = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'login_type must be student or supervisor' });
     }
 
-    const roleLabels = {
-      STUDENT: 'Student',
-      SCHOOL: 'School Supervisor',
-      INDUSTRY: 'Industry Supervisor',
-      COORDINATOR: 'Coordinator',
-      ITF: 'ITF Officer'
-    };
+    // Constant-time dummy hash to defend against timing attacks
+    const DUMMY_HASH = '$2b$10$e8wFvQx2l0G2qE7V4hHhke0cO4rM2XfIe4Q6W3q4m1Z4p9x1y2z3a';
 
-    let user;
+    let user = null;
+    let userType = login_type;
+
+    // Search requested account type first
     if (login_type === 'student') {
       user = await prisma.student.findUnique({ where: { email } });
       if (!user) {
-        // Helpful check: did a supervisor try to log in under Student role?
-        const supervisorAccount = await prisma.supervisor.findUnique({ where: { email } });
-        if (supervisorAccount) {
-          const supRoleName = roleLabels[supervisorAccount.role] || supervisorAccount.role;
-          return res.status(403).json({
-            success: false,
-            message: `Role mismatch: This email is registered as an ${supRoleName}, not a Student. Please select "${supRoleName}" above to sign in.`
-          });
+        // Fallback: check supervisor table to allow seamless authentication if credentials match
+        const sup = await prisma.supervisor.findUnique({ where: { email } });
+        if (sup) {
+          user = sup;
+          userType = 'supervisor';
         }
-        return res.status(401).json({ success: false, message: 'Invalid email or password' });
       }
     } else {
       user = await prisma.supervisor.findUnique({ where: { email } });
       if (!user) {
-        // Helpful check: did a student try to log in under a supervisor role?
-        const studentAccount = await prisma.student.findUnique({ where: { email } });
-        if (studentAccount) {
-          return res.status(403).json({
-            success: false,
-            message: 'Role mismatch: This email is registered as a Student. Please select the "Student" role above to sign in.'
-          });
+        // Fallback: check student table to allow seamless authentication if credentials match
+        const stu = await prisma.student.findUnique({ where: { email } });
+        if (stu) {
+          user = stu;
+          userType = 'student';
         }
-        return res.status(401).json({ success: false, message: 'Invalid email or password' });
-      }
-
-      // Strict supervisor role mismatch check
-      if (expected_role && user.role !== expected_role) {
-        const actualRoleName = roleLabels[user.role] || user.role;
-        const requestedRoleName = roleLabels[expected_role] || expected_role;
-        return res.status(403).json({
-          success: false,
-          message: `Role mismatch: This account (${user.email}) is registered as an ${actualRoleName}, not a ${requestedRoleName}. Please select "${actualRoleName}" above to sign in.`
-        });
       }
     }
 
+    // If no user found in either table, run dummy bcrypt compare to equalize response time
+    if (!user) {
+      await bcrypt.compare(password, DUMMY_HASH);
+      return res.status(401).json({ success: false, message: 'Invalid email or password' });
+    }
+
+    // Verify password
     const isMatch = await bcrypt.compare(password, user.password_hash);
     if (!isMatch) {
       return res.status(401).json({ success: false, message: 'Invalid email or password' });
     }
 
     const payload = {
-      id: login_type === 'student' ? user.student_id : user.supervisor_id,
+      id: userType === 'student' ? user.student_id : user.supervisor_id,
       email: user.email,
-      type: login_type,
-      role: login_type === 'student' ? 'STUDENT' : user.role,
+      type: userType,
+      role: userType === 'student' ? 'STUDENT' : user.role,
     };
 
     const { accessToken, refreshToken } = generateTokens(payload);
