@@ -3,6 +3,7 @@ import { Outlet, Navigate, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
 import { LogOut, User, ShieldCheck } from 'lucide-react';
 import NotificationCenter from '../components/NotificationCenter';
+import ThemeToggle from '../components/ThemeToggle';
 
 const formatRoleLabel = (role) => {
   switch (role) {
@@ -59,7 +60,10 @@ const MainLayout = () => {
           </div>
         </div>
 
-        <div className="navbar-actions">
+        <div className="navbar-actions" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          {/* Theme Toggle */}
+          <ThemeToggle />
+
           {/* Notifications */}
           <NotificationCenter />
 

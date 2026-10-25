@@ -98,7 +98,7 @@ const NotificationCenter = () => {
               alignItems: 'center',
               justifyContent: 'center',
               padding: '0 4px',
-              boxShadow: '0 0 0 2px #ffffff'
+              boxShadow: '0 0 0 2px var(--bg-surface)'
             }}
           >
             {unreadCount > 9 ? '9+' : unreadCount}
@@ -118,7 +118,7 @@ const NotificationCenter = () => {
             overflowY: 'auto',
             padding: 0,
             zIndex: 1000,
-            boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)'
+            boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.2)'
           }}
         >
           <div
@@ -172,7 +172,7 @@ const NotificationCenter = () => {
                   style={{
                     padding: '12px 16px',
                     borderBottom: '1px solid var(--border-subtle)',
-                    backgroundColor: item.is_read ? 'transparent' : 'rgba(241, 245, 249, 0.7)',
+                    backgroundColor: item.is_read ? 'transparent' : 'var(--surface-hover)',
                     transition: 'background-color 0.15s ease',
                     display: 'flex',
                     alignItems: 'flex-start',
@@ -185,7 +185,7 @@ const NotificationCenter = () => {
                       width: '8px',
                       height: '8px',
                       borderRadius: '50%',
-                      backgroundColor: item.is_read ? 'transparent' : '#2563eb',
+                      backgroundColor: item.is_read ? 'transparent' : 'var(--primary)',
                       marginTop: '6px',
                       flexShrink: 0
                     }}

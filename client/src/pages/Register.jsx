@@ -3,6 +3,7 @@ import { useNavigate, Navigate, Link } from 'react-router-dom';
 import api from '../services/api';
 import { AuthContext } from '../contexts/AuthContext';
 import { Building2, AlertCircle, ArrowLeft } from 'lucide-react';
+import ThemeToggle from '../components/ThemeToggle';
 
 const Register = () => {
   const { user, login } = useContext(AuthContext);
@@ -64,34 +65,36 @@ const Register = () => {
     <div className="flex-center" style={{ minHeight: '100vh', padding: '24px' }}>
       <div className="glass-panel" style={{ maxWidth: '500px', width: '100%' }}>
         
-        <Link
-          to="/"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px',
-            color: 'var(--text-muted)',
-            fontSize: '0.85rem',
-            fontWeight: 500,
-            textDecoration: 'none',
-            marginBottom: '18px',
-            padding: '4px 8px',
-            borderRadius: '6px',
-            backgroundColor: 'var(--surface-hover)',
-            transition: 'all 0.15s ease'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.color = 'var(--text-main)';
-            e.currentTarget.style.backgroundColor = 'var(--border-subtle)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.color = 'var(--text-muted)';
-            e.currentTarget.style.backgroundColor = 'var(--surface-hover)';
-          }}
-        >
-          <ArrowLeft size={15} />
-          <span>Back to Homepage</span>
-        </Link>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
+          <Link
+            to="/"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              color: 'var(--text-muted)',
+              fontSize: '0.85rem',
+              fontWeight: 500,
+              textDecoration: 'none',
+              padding: '4px 8px',
+              borderRadius: '6px',
+              backgroundColor: 'var(--surface-hover)',
+              transition: 'all 0.15s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = 'var(--text-main)';
+              e.currentTarget.style.backgroundColor = 'var(--border-subtle)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = 'var(--text-muted)';
+              e.currentTarget.style.backgroundColor = 'var(--surface-hover)';
+            }}
+          >
+            <ArrowLeft size={15} />
+            <span>Back to Homepage</span>
+          </Link>
+          <ThemeToggle />
+        </div>
 
         <div style={{ marginBottom: '24px' }}>
           <h1 style={{ fontSize: '1.5rem', marginBottom: '8px' }}>Create Student Account</h1>
