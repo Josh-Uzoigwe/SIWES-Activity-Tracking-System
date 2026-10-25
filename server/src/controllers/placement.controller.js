@@ -18,7 +18,7 @@ exports.getPlacementByStudentId = async (req, res, next) => {
     });
 
     if (!placement) {
-      return res.status(404).json({ success: false, message: 'Placement not found' });
+      return res.status(200).json({ success: true, data: null });
     }
 
     res.status(200).json({

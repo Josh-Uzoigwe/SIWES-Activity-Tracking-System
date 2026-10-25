@@ -67,6 +67,8 @@ const StudentDashboard = () => {
   // Official Bank Details Modal state
   const [showBankModal, setShowBankModal] = useState(false);
   const [submittingBank, setSubmittingBank] = useState(false);
+  const [bankModalError, setBankModalError] = useState('');
+  const [placementModalError, setPlacementModalError] = useState('');
   const [bankForm, setBankForm] = useState({
     bank_name: '',
     account_number: '',
@@ -213,11 +215,13 @@ const StudentDashboard = () => {
         industry_supervisor_phone: ''
       });
     }
+    setPlacementModalError('');
     setShowPlacementModal(true);
   };
 
   const handleSavePlacement = async (e) => {
     e.preventDefault();
+    setPlacementModalError('');
     try {
       setSubmittingPlacement(true);
       const res = await api.post('/placements', placementForm);
@@ -227,7 +231,9 @@ const StudentDashboard = () => {
         loadData();
       }
     } catch (err) {
-      setMessage({ text: err.response?.data?.message || 'Failed to save placement details', type: 'error' });
+      const errMsg = err.response?.data?.message || 'Failed to save placement details';
+      setPlacementModalError(errMsg);
+      setMessage({ text: errMsg, type: 'error' });
     } finally {
       setSubmittingPlacement(false);
     }
@@ -235,6 +241,7 @@ const StudentDashboard = () => {
 
   const openBankModal = () => {
     const profile = studentProfile || user;
+    setBankModalError('');
     setBankForm({
       bank_name: profile.bank_name || '',
       account_number: profile.account_number || '',
@@ -245,9 +252,14 @@ const StudentDashboard = () => {
 
   const handleSaveBankDetails = async (e) => {
     e.preventDefault();
+    setBankModalError('');
     const cleanAccNo = String(bankForm.account_number).trim();
     if (!/^\d{10}$/.test(cleanAccNo)) {
-      setMessage({ text: 'Account number must be exactly 10 digits (NUBAN).', type: 'error' });
+      setBankModalError('Account number must be exactly 10 digits (NUBAN).');
+      return;
+    }
+    if (!bankForm.bank_name) {
+      setBankModalError('Please select your official commercial bank.');
       return;
     }
     try {
@@ -262,7 +274,9 @@ const StudentDashboard = () => {
         loadData();
       }
     } catch (err) {
-      setMessage({ text: err.response?.data?.message || 'Failed to save bank details', type: 'error' });
+      const errMsg = err.response?.data?.message || 'Failed to save bank details';
+      setBankModalError(errMsg);
+      setMessage({ text: errMsg, type: 'error' });
     } finally {
       setSubmittingBank(false);
     }
@@ -877,6 +891,12 @@ const StudentDashboard = () => {
               </button>
             </div>
 
+            {placementModalError && (
+              <div style={{ backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', padding: '10px 14px', marginBottom: '16px', fontSize: '0.85rem', color: '#b91c1c' }}>
+                {placementModalError}
+              </div>
+            )}
+
             <form onSubmit={handleSavePlacement}>
               <div className="input-group">
                 <label>Host Company / Organization Name *</label>
@@ -1000,6 +1020,12 @@ const StudentDashboard = () => {
             <div style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', padding: '12px', marginBottom: '16px', fontSize: '0.785rem', color: '#166534' }}>
               <strong>Official CBN Commercial Banks Only:</strong> The Industrial Training Fund disburse allowances exclusively to verified Nigerian commercial bank accounts.
             </div>
+
+            {bankModalError && (
+              <div style={{ backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', padding: '10px 14px', marginBottom: '16px', fontSize: '0.85rem', color: '#b91c1c' }}>
+                {bankModalError}
+              </div>
+            )}
 
             <form onSubmit={handleSaveBankDetails}>
               <div className="input-group">
