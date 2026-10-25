@@ -335,88 +335,68 @@ const LandingPage = () => {
           >
             <div
               style={{
-                padding: '18px 20px',
+                padding: '20px 22px',
                 backgroundColor: '#ffffff',
                 border: '1px solid #e2e8f0',
-                borderTop: '2.5px solid #047857',
                 borderRadius: '8px',
                 boxShadow: '0 1px 3px rgba(15, 23, 42, 0.04)'
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                <span style={{ fontWeight: 700, fontSize: '0.9rem', color: '#0f172a' }}>3-Day Window</span>
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '0.68rem', fontWeight: 700, color: '#047857', letterSpacing: '0.04em' }}>
-                  <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: '#10b981' }}></span>
-                  72H LOCK
-                </span>
-              </div>
-              <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0, lineHeight: 1.45 }}>
+              <h4 style={{ margin: '0 0 8px', fontWeight: 700, fontSize: '0.95rem', color: '#0f172a' }}>
+                3-Day Window
+              </h4>
+              <p style={{ fontSize: '0.825rem', color: '#64748b', margin: 0, lineHeight: 1.5 }}>
                 Prevents retroactive falsification by enforcing log submissions within 72 hours.
               </p>
             </div>
 
             <div
               style={{
-                padding: '18px 20px',
+                padding: '20px 22px',
                 backgroundColor: '#ffffff',
                 border: '1px solid #e2e8f0',
-                borderTop: '2.5px solid #0284c7',
                 borderRadius: '8px',
                 boxShadow: '0 1px 3px rgba(15, 23, 42, 0.04)'
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                <span style={{ fontWeight: 700, fontSize: '0.9rem', color: '#0f172a' }}>Dual Endorsements</span>
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '0.68rem', fontWeight: 700, color: '#0284c7', letterSpacing: '0.04em' }}>
-                  <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: '#0ea5e9' }}></span>
-                  2-TIER SIGN-OFF
-                </span>
-              </div>
-              <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0, lineHeight: 1.45 }}>
+              <h4 style={{ margin: '0 0 8px', fontWeight: 700, fontSize: '0.95rem', color: '#0f172a' }}>
+                Dual Endorsements
+              </h4>
+              <p style={{ fontSize: '0.825rem', color: '#64748b', margin: 0, lineHeight: 1.5 }}>
                 Requires both School Supervisor and Industry Trainer verification.
               </p>
             </div>
 
             <div
               style={{
-                padding: '18px 20px',
+                padding: '20px 22px',
                 backgroundColor: '#ffffff',
                 border: '1px solid #e2e8f0',
-                borderTop: '2.5px solid #7c3aed',
                 borderRadius: '8px',
                 boxShadow: '0 1px 3px rgba(15, 23, 42, 0.04)'
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                <span style={{ fontWeight: 700, fontSize: '0.9rem', color: '#0f172a' }}>Instant PDF Export</span>
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '0.68rem', fontWeight: 700, color: '#7c3aed', letterSpacing: '0.04em' }}>
-                  <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: '#a855f7' }}></span>
-                  ITF STANDARD
-                </span>
-              </div>
-              <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0, lineHeight: 1.45 }}>
+              <h4 style={{ margin: '0 0 8px', fontWeight: 700, fontSize: '0.95rem', color: '#0f172a' }}>
+                Instant PDF Export
+              </h4>
+              <p style={{ fontSize: '0.825rem', color: '#64748b', margin: 0, lineHeight: 1.5 }}>
                 Generates a standardized, printable official logbook ready for institutional defense.
               </p>
             </div>
 
             <div
               style={{
-                padding: '18px 20px',
+                padding: '20px 22px',
                 backgroundColor: '#ffffff',
                 border: '1px solid #e2e8f0',
-                borderTop: '2.5px solid #d97706',
                 borderRadius: '8px',
                 boxShadow: '0 1px 3px rgba(15, 23, 42, 0.04)'
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                <span style={{ fontWeight: 700, fontSize: '0.9rem', color: '#0f172a' }}>Vetted Clearance</span>
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '0.68rem', fontWeight: 700, color: '#d97706', letterSpacing: '0.04em' }}>
-                  <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: '#f59e0b' }}></span>
-                  COORDINATOR GATE
-                </span>
-              </div>
-              <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0, lineHeight: 1.45 }}>
+              <h4 style={{ margin: '0 0 8px', fontWeight: 700, fontSize: '0.95rem', color: '#0f172a' }}>
+                Vetted Clearance
+              </h4>
+              <p style={{ fontSize: '0.825rem', color: '#64748b', margin: 0, lineHeight: 1.5 }}>
                 Guarantees students are verified by their university coordinator before logging.
               </p>
             </div>
