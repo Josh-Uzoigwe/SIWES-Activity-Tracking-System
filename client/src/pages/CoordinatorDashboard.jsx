@@ -29,6 +29,7 @@ const CoordinatorDashboard = () => {
   const [supervisors, setSupervisors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [clearingId, setClearingId] = useState(null);
 
   // Modals
   const [showPlacementModal, setShowPlacementModal] = useState(false);
@@ -237,14 +238,21 @@ const CoordinatorDashboard = () => {
 
   const handleClearStudent = async (studentId) => {
     try {
+      setClearingId(studentId);
       clearMessages();
       const res = await api.put(`/students/${studentId}/clear`);
       if (res.data.success) {
         setSuccessMsg('Student cleared for SIWES successfully!');
-        loadDashboardData();
+        // Optimistically update student status immediately
+        setStudents(prev => prev.map(s => s.student_id === studentId ? { ...s, status: 'cleared' } : s));
+        api.get('/analytics').then(r => r.data.success && setAnalytics(r.data.data)).catch(() => {});
       }
     } catch (err) {
-      setErrorMsg(err.response?.data?.message || 'Failed to clear student');
+      const msg = err.response?.data?.message || 'Failed to clear student';
+      setErrorMsg(msg);
+      window.alert(`Clearance error: ${msg}`);
+    } finally {
+      setClearingId(null);
     }
   };
 
@@ -252,14 +260,20 @@ const CoordinatorDashboard = () => {
     const reason = window.prompt('Please provide a reason for flagging/rejecting this student (e.g. Matriculation number mismatch, unregistered department):');
     if (reason === null) return;
     try {
+      setClearingId(studentId);
       clearMessages();
       const res = await api.put(`/students/${studentId}/reject`, { reason });
       if (res.data.success) {
         setSuccessMsg('Student clearance flagged.');
-        loadDashboardData();
+        setStudents(prev => prev.map(s => s.student_id === studentId ? { ...s, status: 'rejected' } : s));
+        api.get('/analytics').then(r => r.data.success && setAnalytics(r.data.data)).catch(() => {});
       }
     } catch (err) {
-      setErrorMsg(err.response?.data?.message || 'Failed to flag student');
+      const msg = err.response?.data?.message || 'Failed to flag student';
+      setErrorMsg(msg);
+      window.alert(`Flag error: ${msg}`);
+    } finally {
+      setClearingId(null);
     }
   };
 
@@ -303,15 +317,25 @@ const CoordinatorDashboard = () => {
         </div>
       </div>
 
-      {/* Global alert messages */}
-      {successMsg && (
-        <div style={{ padding: '12px 16px', backgroundColor: 'var(--success-bg)', color: 'var(--success-text)', border: '1px solid var(--success-border)', borderRadius: 'var(--radius-md)', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem' }}>
-          <CheckCircle size={18} /> {successMsg}
-        </div>
-      )}
-      {errorMsg && (
-        <div className="alert-error" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <AlertCircle size={18} /> {errorMsg}
+      {/* Global alert messages (sticky so user sees feedback anywhere on page) */}
+      {(successMsg || errorMsg) && (
+        <div style={{ position: 'sticky', top: '75px', zIndex: 100, marginBottom: '20px' }}>
+          {successMsg && (
+            <div style={{ padding: '12px 18px', backgroundColor: 'var(--success-bg)', color: 'var(--success-text)', border: '1px solid var(--success-border)', borderRadius: 'var(--radius-md)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: 'var(--shadow-md)', marginBottom: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem', fontWeight: 500 }}>
+                <CheckCircle size={18} /> {successMsg}
+              </div>
+              <button type="button" onClick={() => setSuccessMsg('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', fontWeight: 700, padding: '2px 6px' }}>✕</button>
+            </div>
+          )}
+          {errorMsg && (
+            <div className="alert-error" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: 'var(--shadow-md)', marginBottom: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem', fontWeight: 500 }}>
+                <AlertCircle size={18} /> {errorMsg}
+              </div>
+              <button type="button" onClick={() => setErrorMsg('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', fontWeight: 700, padding: '2px 6px' }}>✕</button>
+            </div>
+          )}
         </div>
       )}
 
@@ -521,10 +545,19 @@ const CoordinatorDashboard = () => {
                           <button
                             type="button"
                             className="btn-primary"
-                            style={{ padding: '6px 12px', fontSize: '0.8rem', backgroundColor: '#15803d', borderColor: '#15803d' }}
+                            disabled={clearingId === s.student_id}
+                            style={{ 
+                              padding: '6px 12px', 
+                              fontSize: '0.8rem', 
+                              backgroundColor: '#15803d', 
+                              borderColor: '#15803d',
+                              opacity: clearingId === s.student_id ? 0.7 : 1,
+                              cursor: clearingId === s.student_id ? 'not-allowed' : 'pointer'
+                            }}
                             onClick={() => handleClearStudent(s.student_id)}
                           >
-                            <UserCheck size={14} style={{ marginRight: '4px' }} /> Clear for SIWES
+                            <UserCheck size={14} style={{ marginRight: '4px' }} />
+                            {clearingId === s.student_id ? 'Clearing...' : 'Clear for SIWES'}
                           </button>
                           <button
                             type="button"
@@ -660,10 +693,18 @@ const CoordinatorDashboard = () => {
                               <button
                                 type="button"
                                 className="btn-primary"
-                                style={{ padding: '6px 10px', fontSize: '0.75rem', backgroundColor: '#15803d', borderColor: '#15803d' }}
+                                disabled={clearingId === s.student_id}
+                                style={{ 
+                                  padding: '6px 10px', 
+                                  fontSize: '0.75rem', 
+                                  backgroundColor: '#15803d', 
+                                  borderColor: '#15803d',
+                                  opacity: clearingId === s.student_id ? 0.7 : 1,
+                                  cursor: clearingId === s.student_id ? 'not-allowed' : 'pointer'
+                                }}
                                 onClick={() => handleClearStudent(s.student_id)}
                               >
-                                Clear
+                                {clearingId === s.student_id ? 'Clearing...' : 'Clear'}
                               </button>
                             )}
                             <button

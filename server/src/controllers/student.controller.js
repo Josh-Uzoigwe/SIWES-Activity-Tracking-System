@@ -170,23 +170,45 @@ exports.clearStudent = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'Student not found' });
     }
 
-    if (student.institution !== coordinator.institution) {
-      return res.status(403).json({ success: false, message: 'Cannot clear student outside your institution' });
+    // Normalize institution comparison (ignore case, whitespace, and common acronyms)
+    const normalize = (str) => (str || '').trim().toLowerCase();
+    const coordInst = normalize(coordinator?.institution);
+    const studInst = normalize(student?.institution);
+
+    if (coordInst && studInst && coordInst !== studInst) {
+      const isUnnMatch = (coordInst.includes('nigeria') || coordInst.includes('unn')) && (studInst.includes('nigeria') || studInst.includes('unn'));
+      const isUnilorinMatch = (coordInst.includes('ilorin') || coordInst.includes('unilorin')) && (studInst.includes('ilorin') || studInst.includes('unilorin'));
+
+      if (!isUnnMatch && !isUnilorinMatch) {
+        return res.status(403).json({ success: false, message: `Cannot clear student outside your institution (${student.institution})` });
+      }
+    }
+
+    if (student.status === 'cleared') {
+      return res.status(200).json({
+        success: true,
+        message: 'Student is already cleared for SIWES',
+        data: student
+      });
     }
 
     const updated = await prisma.student.update({
       where: { student_id },
-      data: { status: 'cleared' }  // only allowlisted value used
+      data: { status: 'cleared' }
     });
 
-    const { createNotification } = require('../services/notification.service');
-    await createNotification({
-      recipient_type: 'student',
-      recipient_id: student_id,
-      message: 'Your institutional SIWES clearance has been approved! You can now log daily workplace activities.',
-      email_subject: 'SIWES Institutional Clearance Approved',
-      email_text: `Congratulations! Your SIWES Coordinator at ${coordinator.institution} has approved your institutional clearance. Your daily activity logbook is now active.`
-    });
+    try {
+      const { createNotification } = require('../services/notification.service');
+      await createNotification({
+        recipient_type: 'student',
+        recipient_id: student_id,
+        message: 'Your institutional SIWES clearance has been approved! You can now log daily workplace activities.',
+        email_subject: 'SIWES Institutional Clearance Approved',
+        email_text: `Congratulations! Your SIWES Coordinator at ${coordinator?.institution || 'your institution'} has approved your institutional clearance. Your daily activity logbook is now active.`
+      });
+    } catch (notifErr) {
+      console.error('Non-critical notification error during clearance:', notifErr);
+    }
 
     res.status(200).json({
       success: true,
@@ -217,23 +239,36 @@ exports.rejectStudent = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'Student not found' });
     }
 
-    if (student.institution !== coordinator.institution) {
-      return res.status(403).json({ success: false, message: 'Cannot flag student outside your institution' });
+    const normalize = (str) => (str || '').trim().toLowerCase();
+    const coordInst = normalize(coordinator?.institution);
+    const studInst = normalize(student?.institution);
+
+    if (coordInst && studInst && coordInst !== studInst) {
+      const isUnnMatch = (coordInst.includes('nigeria') || coordInst.includes('unn')) && (studInst.includes('nigeria') || studInst.includes('unn'));
+      const isUnilorinMatch = (coordInst.includes('ilorin') || coordInst.includes('unilorin')) && (studInst.includes('ilorin') || studInst.includes('unilorin'));
+
+      if (!isUnnMatch && !isUnilorinMatch) {
+        return res.status(403).json({ success: false, message: 'Cannot flag student outside your institution' });
+      }
     }
 
     const updated = await prisma.student.update({
       where: { student_id },
-      data: { status: 'rejected' }  // only allowlisted value used
+      data: { status: 'rejected' }
     });
 
-    const { createNotification } = require('../services/notification.service');
-    await createNotification({
-      recipient_type: 'student',
-      recipient_id: student_id,
-      message: `Your SIWES clearance was not approved: ${reason || 'Please report to your institutional SIWES Coordinator.'}`,
-      email_subject: 'SIWES Clearance Status Update',
-      email_text: `Your SIWES clearance at ${coordinator.institution} could not be approved. Reason: ${reason || 'Please report to the SIWES Directorate.'}`
-    });
+    try {
+      const { createNotification } = require('../services/notification.service');
+      await createNotification({
+        recipient_type: 'student',
+        recipient_id: student_id,
+        message: `Your SIWES clearance was not approved: ${reason || 'Please report to your institutional SIWES Coordinator.'}`,
+        email_subject: 'SIWES Clearance Status Update',
+        email_text: `Your SIWES clearance at ${coordinator?.institution || 'your institution'} could not be approved. Reason: ${reason || 'Please report to the SIWES Directorate.'}`
+      });
+    } catch (notifErr) {
+      console.error('Non-critical notification error during rejection:', notifErr);
+    }
 
     res.status(200).json({
       success: true,
