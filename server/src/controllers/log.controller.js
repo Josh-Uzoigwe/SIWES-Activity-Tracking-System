@@ -261,7 +261,8 @@ exports.reviewLog = async (req, res, next) => {
         status,
         supervisor_comment,
         supervisor_id: req.user.id,
-        reviewed_at: new Date()
+        reviewed_at: new Date(),
+        ...(status === 'rejected' ? { industry_endorsed: false } : {})
       }
     });
 
@@ -296,6 +297,13 @@ exports.endorseLog = async (req, res, next) => {
 
     if (!log) {
       return res.status(404).json({ success: false, message: 'Log not found' });
+    }
+
+    if (log.status === 'rejected') {
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot endorse an activity log that has been rejected by the academic supervisor. The student must resubmit a revised entry first.'
+      });
     }
 
     // Verify supervisor is actually assigned to this student

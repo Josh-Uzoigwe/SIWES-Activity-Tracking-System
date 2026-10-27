@@ -45,6 +45,9 @@ const StudentDashboard = () => {
   });
   const [evidenceFile, setEvidenceFile] = useState(null);
   const [uploadingEvidence, setUploadingEvidence] = useState(false);
+  const [submittingLog, setSubmittingLog] = useState(false);
+  const [logModalError, setLogModalError] = useState('');
+  const [logSuccess, setLogSuccess] = useState(false);
 
   // Final Report Modal state
   const [showReportModal, setShowReportModal] = useState(false);
@@ -103,6 +106,8 @@ const StudentDashboard = () => {
   }, []);
 
   const openNewLogModal = (originalLog = null) => {
+    setLogModalError('');
+    setLogSuccess(false);
     if (originalLog) {
       setResubmitLogId(originalLog.activity_id);
       setLogForm({
@@ -148,24 +153,34 @@ const StudentDashboard = () => {
 
   const handleLogSubmit = async (e) => {
     e.preventDefault();
+    setLogModalError('');
     try {
+      setSubmittingLog(true);
       const payload = {
         ...logForm,
         original_log_id: resubmitLogId || undefined
       };
 
       await api.post('/logs', payload);
+      setLogSuccess(true);
       setMessage({
         text: resubmitLogId ? 'Log revision resubmitted successfully!' : 'Daily activity log submitted successfully!',
         type: 'success'
       });
-      setShowLogModal(false);
-      loadData();
+      setTimeout(() => {
+        setShowLogModal(false);
+        setLogSuccess(false);
+        loadData();
+      }, 700);
     } catch (err) {
+      const errMsg = err.response?.data?.message || 'Failed to submit log entry';
+      setLogModalError(errMsg);
       setMessage({
-        text: err.response?.data?.message || 'Failed to submit log entry',
+        text: errMsg,
         type: 'error'
       });
+    } finally {
+      setSubmittingLog(false);
     }
   };
 
@@ -690,7 +705,7 @@ const StudentDashboard = () => {
                   {log.status === 'approved' && <CheckCircle size={12} />}
                   {log.status === 'pending' && <Clock size={12} />}
                   {log.status === 'rejected' && <XCircle size={12} />}
-                  {log.status}
+                  {log.status === 'rejected' ? 'Revision Needed' : log.status}
                 </span>
               </div>
 
@@ -724,7 +739,7 @@ const StudentDashboard = () => {
 
               {/* Endorsements & Supervisor Feedback */}
               <div style={{ marginTop: 'auto', paddingTop: '12px', borderTop: '1px solid var(--border-subtle)', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                {log.industry_endorsed && (
+                {log.industry_endorsed && log.status !== 'rejected' && (
                   <div style={{ fontSize: '0.75rem', color: '#15803d', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 500 }}>
                     <CheckCircle size={13} /> Industry Supervisor Endorsement Confirmed
                   </div>
@@ -771,6 +786,13 @@ const StudentDashboard = () => {
             </div>
 
             <form onSubmit={handleLogSubmit}>
+              {logModalError && (
+                <div style={{ padding: '10px 14px', backgroundColor: 'var(--error-bg)', color: 'var(--error-text)', border: '1px solid var(--error-border)', borderRadius: 'var(--radius-md)', marginBottom: '16px', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <AlertCircle size={16} style={{ flexShrink: 0 }} />
+                  <span>{logModalError}</span>
+                </div>
+              )}
+
               <div className="input-group">
                 <label>Log Activity Date *</label>
                 <input
@@ -828,8 +850,27 @@ const StudentDashboard = () => {
                 <button type="button" className="btn-secondary" style={{ flex: 1 }} onClick={() => setShowLogModal(false)}>
                   Cancel
                 </button>
-                <button type="submit" className="btn-primary" style={{ flex: 1 }} disabled={uploadingEvidence}>
-                  {resubmitLogId ? 'Resubmit Entry' : 'Submit Activity Log'}
+                <button
+                  type="submit"
+                  className="btn-primary"
+                  style={{
+                    flex: 1,
+                    backgroundColor: logSuccess ? '#15803d' : undefined,
+                    borderColor: logSuccess ? '#15803d' : undefined
+                  }}
+                  disabled={uploadingEvidence || submittingLog || logSuccess}
+                >
+                  {logSuccess ? (
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                      <CheckCircle size={16} /> Submitted Successfully!
+                    </span>
+                  ) : submittingLog ? (
+                    'Submitting Entry...'
+                  ) : resubmitLogId ? (
+                    'Resubmit Corrected Entry'
+                  ) : (
+                    'Submit Activity Log'
+                  )}
                 </button>
               </div>
             </form>

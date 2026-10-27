@@ -33,6 +33,8 @@ const SupervisorDashboard = () => {
   const [reviewModal, setReviewModal] = useState({ show: false, log: null });
   const [feedback, setFeedback] = useState({ status: 'approved', comment: '' });
   const [submittingReview, setSubmittingReview] = useState(false);
+  const [reviewModalError, setReviewModalError] = useState('');
+  const [reviewSuccess, setReviewSuccess] = useState(false);
 
   // Visit scheduling modal
   const [showVisitModal, setShowVisitModal] = useState(false);
@@ -64,6 +66,8 @@ const SupervisorDashboard = () => {
   }, []);
 
   const openReviewModal = (log) => {
+    setReviewModalError('');
+    setReviewSuccess(false);
     setReviewModal({ show: true, log });
     setFeedback({
       status: 'approved',
@@ -73,6 +77,7 @@ const SupervisorDashboard = () => {
 
   const handleReview = async (e) => {
     e.preventDefault();
+    setReviewModalError('');
     try {
       setSubmittingReview(true);
       const logId = reviewModal.log.activity_id;
@@ -90,10 +95,16 @@ const SupervisorDashboard = () => {
         setMessage({ text: `Log marked as ${feedback.status}! Student notified.`, type: 'success' });
       }
 
-      setReviewModal({ show: false, log: null });
-      loadData();
+      setReviewSuccess(true);
+      setTimeout(() => {
+        setReviewModal({ show: false, log: null });
+        setReviewSuccess(false);
+        loadData();
+      }, 700);
     } catch (error) {
-      setMessage({ text: error.response?.data?.message || 'Failed to review log', type: 'error' });
+      const errMsg = error.response?.data?.message || 'Failed to review log. Please try again.';
+      setReviewModalError(errMsg);
+      setMessage({ text: errMsg, type: 'error' });
     } finally {
       setSubmittingReview(false);
     }
@@ -397,16 +408,31 @@ const SupervisorDashboard = () => {
                         )}
                       </td>
                       <td style={{ padding: '14px 18px' }}>
-                        <span className={`badge ${log.status}`}>{log.status}</span>
-                        {log.industry_endorsed && (
-                          <div style={{ fontSize: '0.7rem', color: '#15803d', marginTop: '4px', fontWeight: 500 }}>
-                            ✓ Endorsed
+                        {log.status === 'rejected' ? (
+                          <div>
+                            <span className="badge rejected">Needs Revision</span>
+                            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                              Rejected by school supervisor
+                            </div>
+                          </div>
+                        ) : (
+                          <div>
+                            <span className={`badge ${log.status}`}>{log.status}</span>
+                            {log.industry_endorsed && (
+                              <div style={{ fontSize: '0.7rem', color: '#15803d', marginTop: '4px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '3px' }}>
+                                <Check size={12} /> Industry Endorsed
+                              </div>
+                            )}
                           </div>
                         )}
                       </td>
                       <td style={{ padding: '14px 18px', textAlign: 'right' }}>
                         {isIndustry ? (
-                          !log.industry_endorsed ? (
+                          log.status === 'rejected' ? (
+                            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
+                              Awaiting Student Revision
+                            </span>
+                          ) : !log.industry_endorsed ? (
                             <button
                               type="button"
                               className="btn-primary"
@@ -416,7 +442,9 @@ const SupervisorDashboard = () => {
                               Endorse Log
                             </button>
                           ) : (
-                            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Endorsed</span>
+                            <span style={{ fontSize: '0.75rem', color: '#15803d', fontWeight: 600 }}>
+                              ✓ Endorsed
+                            </span>
                           )
                         ) : (
                           <button
@@ -595,6 +623,13 @@ const SupervisorDashboard = () => {
             </div>
 
             <form onSubmit={handleReview}>
+              {reviewModalError && (
+                <div style={{ padding: '10px 14px', backgroundColor: 'var(--error-bg)', color: 'var(--error-text)', border: '1px solid var(--error-border)', borderRadius: 'var(--radius-md)', marginBottom: '16px', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <AlertCircle size={16} style={{ flexShrink: 0 }} />
+                  <span>{reviewModalError}</span>
+                </div>
+              )}
+
               {!isIndustry ? (
                 <>
                   <div className="input-group">
@@ -632,8 +667,28 @@ const SupervisorDashboard = () => {
                 <button type="button" className="btn-secondary" style={{ flex: 1 }} onClick={() => setReviewModal({ show: false, log: null })}>
                   Cancel
                 </button>
-                <button id="submit-review-modal-btn" type="submit" className="btn-primary" style={{ flex: 1 }} disabled={submittingReview}>
-                  {submittingReview ? 'Submitting...' : isIndustry ? 'Confirm Endorsement' : 'Submit Review'}
+                <button
+                  id="submit-review-modal-btn"
+                  type="submit"
+                  className="btn-primary"
+                  style={{
+                    flex: 1,
+                    backgroundColor: reviewSuccess ? '#15803d' : undefined,
+                    borderColor: reviewSuccess ? '#15803d' : undefined
+                  }}
+                  disabled={submittingReview || reviewSuccess}
+                >
+                  {reviewSuccess ? (
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                      <CheckCircle size={16} /> {isIndustry ? 'Endorsed Successfully!' : 'Review Submitted!'}
+                    </span>
+                  ) : submittingReview ? (
+                    'Submitting...'
+                  ) : isIndustry ? (
+                    'Confirm Endorsement'
+                  ) : (
+                    'Submit Review'
+                  )}
                 </button>
               </div>
             </form>

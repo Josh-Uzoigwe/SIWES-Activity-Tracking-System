@@ -41,7 +41,13 @@ exports.exportLogbook = async (req, res, next) => {
       where: { student_id: targetStudentId },
       include: {
         placements: { include: { school_supervisor: true, industry_supervisor: true } },
-        activity_logs: { orderBy: { log_date: 'asc' } }
+        activity_logs: {
+          where: {
+            status: { not: 'rejected' },
+            industry_endorsed: true
+          },
+          orderBy: { log_date: 'asc' }
+        }
       }
     });
 
@@ -54,7 +60,7 @@ exports.exportLogbook = async (req, res, next) => {
     doc.pipe(res);
 
     // Header
-    doc.fontSize(20).text('SIWES Student Logbook', { align: 'center' });
+    doc.fontSize(20).text('SIWES Student Certified Logbook', { align: 'center' });
     doc.moveDown();
     
     // Student Details
@@ -67,12 +73,13 @@ exports.exportLogbook = async (req, res, next) => {
 
     // Logs
     if (student.activity_logs.length === 0) {
-      doc.text('No activity logs found.');
+      doc.fontSize(11).text('No certified (endorsed) activity logs found yet. Only verified and endorsed entries are included in the official logbook.');
     } else {
       student.activity_logs.forEach((log, i) => {
-        doc.fontSize(14).text(`Day ${i + 1} - ${new Date(log.log_date).toDateString()}`, { underline: true });
+        doc.fontSize(13).text(`Entry #${i + 1} - ${new Date(log.log_date).toDateString()}`, { underline: true });
         doc.fontSize(10)
-           .text(`Status: ${log.status.toUpperCase()}`)
+           .text(`Workplace Status: ENDORSED`)
+           .text(`Academic Status: ${log.status.toUpperCase()}`)
            .text(`Description: ${log.description}`)
            .text(`Skills Acquired: ${log.skills_acquired || 'N/A'}`)
            .text(`Supervisor Comment: ${log.supervisor_comment || 'None'}`);

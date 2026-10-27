@@ -38,27 +38,28 @@ const NotificationCenter = () => {
   const unreadCount = notifications.filter((n) => !n.is_read).length;
 
   const markAsRead = async (id, e) => {
-    e.stopPropagation();
+    if (e) e.stopPropagation();
+    // Optimistic UI update
+    setNotifications((prev) =>
+      prev.map((n) => (n.notification_id === id ? { ...n, is_read: true } : n))
+    );
     try {
       await api.put(`/notifications/${id}/read`);
-      setNotifications((prev) =>
-        prev.map((n) => (n.notification_id === id ? { ...n, is_read: true } : n))
-      );
     } catch (err) {
       console.error('Failed to mark notification as read', err);
     }
   };
 
-  const markAllAsRead = async () => {
-    const unread = notifications.filter((n) => !n.is_read);
-    for (const n of unread) {
-      try {
-        await api.put(`/notifications/${n.notification_id}/read`);
-      } catch (err) {
-        // ignore individual error
-      }
-    }
+  const markAllAsRead = async (e) => {
+    if (e) e.stopPropagation();
+    // Optimistic UI update
     setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+    try {
+      await api.put('/notifications/read-all');
+    } catch (err) {
+      console.error('Failed to mark all notifications as read', err);
+      fetchNotifications(); // revert if failed
+    }
   };
 
   return (
@@ -169,6 +170,7 @@ const NotificationCenter = () => {
               notifications.map((item) => (
                 <div
                   key={item.notification_id}
+                  onClick={() => !item.is_read && markAsRead(item.notification_id)}
                   style={{
                     padding: '12px 16px',
                     borderBottom: '1px solid var(--border-subtle)',
@@ -177,7 +179,7 @@ const NotificationCenter = () => {
                     display: 'flex',
                     alignItems: 'flex-start',
                     gap: '12px',
-                    cursor: 'default'
+                    cursor: item.is_read ? 'default' : 'pointer'
                   }}
                 >
                   <div

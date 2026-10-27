@@ -4,11 +4,11 @@ const prisma = require('../config/db');
 exports.getNotifications = async (req, res, next) => {
   try {
     const recipient_type = req.user.role === 'STUDENT' ? 'student' : 'supervisor';
-    const recipient_id = req.user.id;
+    const recipient_id = parseInt(req.user.id, 10);
 
     const notifications = await prisma.notification.findMany({
       where: {
-        recipient_type,
+        recipient_type: { equals: recipient_type },
         recipient_id
       },
       orderBy: { created_at: 'desc' }
@@ -23,33 +23,65 @@ exports.getNotifications = async (req, res, next) => {
   }
 };
 
-// Mark a notification as read
+// Mark a single notification as read
 exports.markAsRead = async (req, res, next) => {
   try {
     const { id } = req.params;
     const recipient_type = req.user.role === 'STUDENT' ? 'student' : 'supervisor';
-    const recipient_id = req.user.id;
+    const recipient_id = parseInt(req.user.id, 10);
+    const notificationId = parseInt(id, 10);
+
+    if (isNaN(notificationId)) {
+      return res.status(400).json({ success: false, message: 'Invalid notification ID' });
+    }
 
     const notification = await prisma.notification.findUnique({
-      where: { notification_id: parseInt(id, 10) }
+      where: { notification_id: notificationId }
     });
 
     if (!notification) {
       return res.status(404).json({ success: false, message: 'Notification not found' });
     }
 
-    if (notification.recipient_type !== recipient_type || notification.recipient_id !== recipient_id) {
+    if (
+      notification.recipient_type.toLowerCase() !== recipient_type.toLowerCase() ||
+      parseInt(notification.recipient_id, 10) !== recipient_id
+    ) {
       return res.status(403).json({ success: false, message: 'Access denied' });
     }
 
     const updated = await prisma.notification.update({
-      where: { notification_id: parseInt(id, 10) },
+      where: { notification_id: notificationId },
       data: { is_read: true }
     });
 
     res.status(200).json({
       success: true,
       data: updated
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Mark all notifications as read for current user
+exports.markAllAsRead = async (req, res, next) => {
+  try {
+    const recipient_type = req.user.role === 'STUDENT' ? 'student' : 'supervisor';
+    const recipient_id = parseInt(req.user.id, 10);
+
+    await prisma.notification.updateMany({
+      where: {
+        recipient_type: { equals: recipient_type },
+        recipient_id,
+        is_read: false
+      },
+      data: { is_read: true }
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'All notifications marked as read'
     });
   } catch (error) {
     next(error);
