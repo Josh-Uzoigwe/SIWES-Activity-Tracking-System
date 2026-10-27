@@ -26,6 +26,14 @@ import {
 } from 'lucide-react';
 import { OFFICIAL_NIGERIAN_BANKS } from '../data/nigerianBanks';
 
+const getLocalDateString = () => {
+  const d = new Date();
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 const StudentDashboard = () => {
   const { user } = useContext(AuthContext);
   const [logs, setLogs] = useState([]);
@@ -38,7 +46,7 @@ const StudentDashboard = () => {
   const [showLogModal, setShowLogModal] = useState(false);
   const [resubmitLogId, setResubmitLogId] = useState(null);
   const [logForm, setLogForm] = useState({
-    log_date: new Date().toISOString().split('T')[0],
+    log_date: getLocalDateString(),
     description: '',
     skills_acquired: '',
     evidence_url: ''
@@ -108,10 +116,11 @@ const StudentDashboard = () => {
   const openNewLogModal = (originalLog = null) => {
     setLogModalError('');
     setLogSuccess(false);
+    setSubmittingLog(false);
     if (originalLog) {
       setResubmitLogId(originalLog.activity_id);
       setLogForm({
-        log_date: originalLog.log_date ? originalLog.log_date.split('T')[0] : new Date().toISOString().split('T')[0],
+        log_date: originalLog.log_date ? originalLog.log_date.split('T')[0] : getLocalDateString(),
         description: originalLog.description || '',
         skills_acquired: originalLog.skills_acquired || '',
         evidence_url: originalLog.evidence_url || ''
@@ -119,7 +128,7 @@ const StudentDashboard = () => {
     } else {
       setResubmitLogId(null);
       setLogForm({
-        log_date: new Date().toISOString().split('T')[0],
+        log_date: getLocalDateString(),
         description: '',
         skills_acquired: '',
         evidence_url: ''

@@ -2,20 +2,34 @@ const prisma = require('../config/db');
 const { createNotification } = require('../services/notification.service');
 
 // Helper to check if date is within allowed range (no future, max 3 days past)
+// Incorporates a 24-hour buffer ahead of UTC to accommodate users in timezones ahead of UTC (e.g., WAT / Nigeria UTC+1)
 const isValidLogDate = (dateString) => {
-  const logDate = new Date(dateString);
+  let year, month, day;
+  if (typeof dateString === 'string' && dateString.includes('-')) {
+    const parts = dateString.split('T')[0].split('-').map(Number);
+    year = parts[0];
+    month = parts[1] - 1;
+    day = parts[2];
+  } else {
+    const d = new Date(dateString);
+    year = d.getUTCFullYear();
+    month = d.getUTCMonth();
+    day = d.getUTCDate();
+  }
+
+  const logDateUTC = new Date(Date.UTC(year, month, day));
   const now = new Date();
   
-  // Strip time for accurate date comparison
-  const logDateOnly = new Date(logDate.getFullYear(), logDate.getMonth(), logDate.getDate());
-  const nowOnly = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  
-  if (logDateOnly > nowOnly) return false; // Future date
-  
-  const diffTime = Math.abs(nowOnly - logDateOnly);
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  
-  return diffDays <= 3; // Max 3 days back
+  // Allow a 24-hour buffer ahead of UTC to account for timezones ahead of UTC
+  const nowMaxFuture = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+  const maxFutureUTC = new Date(Date.UTC(nowMaxFuture.getUTCFullYear(), nowMaxFuture.getUTCMonth(), nowMaxFuture.getUTCDate()));
+
+  if (logDateUTC > maxFutureUTC) return false;
+
+  const nowUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  const diffDays = Math.floor((nowUTC - logDateUTC) / (1000 * 60 * 60 * 24));
+
+  return diffDays <= 3;
 };
 
 // Create a new activity log
