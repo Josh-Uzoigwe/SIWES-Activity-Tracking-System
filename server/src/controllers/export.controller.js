@@ -54,37 +54,282 @@ exports.exportLogbook = async (req, res, next) => {
     if (!student) return res.status(404).json({ success: false, message: 'Student not found' });
 
 
-    const doc = new PDFDocument({ margin: 50 });
+    const doc = new PDFDocument({ size: 'A4', margin: 36, bufferPages: true });
+    const safeMatric = (student.matric_no || 'student').replace(/[^a-zA-Z0-9_-]/g, '_');
     res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename=logbook_${student.matric_no}.pdf`);
+    res.setHeader('Content-Disposition', `attachment; filename=logbook_${safeMatric}.pdf`);
     doc.pipe(res);
 
-    // Header
-    doc.fontSize(20).text('SIWES Student Certified Logbook', { align: 'center' });
-    doc.moveDown();
-    
-    // Student Details
-    doc.fontSize(12)
-       .text(`Name: ${student.full_name}`)
-       .text(`Matric No: ${student.matric_no}`)
-       .text(`Department: ${student.department}`)
-       .text(`Institution: ${student.institution}`);
-    doc.moveDown();
+    const PAGE_W = doc.page.width;
+    const PAGE_H = doc.page.height;
+    const M = 36;
+    const CW = PAGE_W - (M * 2);
 
-    // Logs
+    // Official Design Palette
+    const C = {
+      emeraldDark: '#064e3b',
+      emeraldPrimary: '#047857',
+      emeraldLight: '#ecfdf5',
+      emeraldBorder: '#a7f3d0',
+      emeraldText: '#065f46',
+      emeraldBadgeBg: '#d1fae5',
+      gold: '#d97706',
+      blueBadgeBg: '#dbeafe',
+      blueText: '#1e40af',
+      slateDark: '#0f172a',
+      slateHeading: '#1e293b',
+      slateText: '#334155',
+      slateMuted: '#64748b',
+      slateBg: '#f8fafc',
+      border: '#e2e8f0',
+      borderStrong: '#cbd5e1',
+      white: '#ffffff',
+      calloutBg: '#f0fdf4',
+      calloutBorder: '#bbf7d0',
+      calloutLeft: '#059669'
+    };
+
+    // Helper: Page Space Check
+    const checkPageSpace = (neededHeight) => {
+      if (doc.y + neededHeight > PAGE_H - 45) {
+        doc.addPage();
+        // Continuation mini header
+        doc.rect(M, M, CW, 3).fill(C.gold);
+        doc.rect(M, M + 3, CW, 20).fill(C.emeraldDark);
+        doc.fillColor(C.white).fontSize(7.5).font('Helvetica-Bold')
+           .text('SIWES CERTIFIED LOGBOOK • CONTINUED', M + 8, M + 9);
+        doc.fillColor(C.emeraldBadgeBg).fontSize(7).font('Helvetica')
+           .text(`${student.full_name} (${student.matric_no})`, M, M + 9, { align: 'right', width: CW - 8 });
+        doc.y = M + 32;
+      }
+    };
+
+    // 1. Executive Top Header Banner
+    doc.rect(M, M, CW, 4).fill(C.gold);
+    const bannerH = 58;
+    doc.rect(M, M + 4, CW, bannerH).fill(C.emeraldDark);
+
+    doc.fillColor(C.emeraldBadgeBg).fontSize(7).font('Helvetica-Bold')
+       .text('FEDERAL REPUBLIC OF NIGERIA • INDUSTRIAL TRAINING FUND (ITF)', M, M + 12, { align: 'center', width: CW, characterSpacing: 1.2 });
+
+    doc.fillColor(C.white).fontSize(13).font('Helvetica-Bold')
+       .text('STUDENT INDUSTRIAL WORK EXPERIENCE SCHEME (SIWES)', M, M + 23, { align: 'center', width: CW, characterSpacing: 0.5 });
+
+    doc.fillColor('#a7f3d0').fontSize(9).font('Helvetica')
+       .text('OFFICIAL CERTIFIED DIGITAL E-LOGBOOK TRANSCRIPT', M, M + 40, { align: 'center', width: CW, characterSpacing: 1 });
+
+    doc.rect(M, M + 4 + bannerH, CW, 2).fill(C.gold);
+    doc.y = M + bannerH + 14;
+
+    // 2. Trainee & Host Establishment Particulars Card
+    const placement = (student.placements && student.placements[0]) || {};
+    const cardY = doc.y;
+    const cardH = 92;
+
+    doc.roundedRect(M, cardY, CW, cardH, 4).fillAndStroke(C.slateBg, C.borderStrong);
+    doc.roundedRect(M, cardY, CW, 18, 4).fill(C.emeraldPrimary);
+    doc.rect(M, cardY + 12, CW, 6).fill(C.emeraldPrimary);
+    doc.fillColor(C.white).fontSize(7.5).font('Helvetica-Bold')
+       .text('PARTICULARS OF TRAINEE & APPROVED PLACEMENT', M + 10, cardY + 5, { width: CW - 20 });
+
+    const colW = (CW - 24) / 2;
+    const col1X = M + 10;
+    const col2X = M + 14 + colW;
+    const textY = cardY + 24;
+
+    const renderField = (label, val, x, y, width) => {
+      doc.fillColor(C.slateMuted).fontSize(7.5).font('Helvetica-Bold')
+         .text(label.toUpperCase() + ': ', x, y, { continued: true });
+      doc.fillColor(C.slateHeading).font('Helvetica')
+         .text(val || 'N/A', { width: width, lineBreak: false });
+    };
+
+    renderField('Trainee Name', student.full_name, col1X, textY, colW);
+    renderField('Matric / Reg No', student.matric_no, col1X, textY + 16, colW);
+    renderField('Department', student.department, col1X, textY + 32, colW);
+    renderField('Institution', student.institution, col1X, textY + 48, colW);
+
+    const indSup = placement.industry_supervisor?.full_name || 'Assigned Workplace Supervisor';
+    const schSup = placement.school_supervisor?.full_name || 'Assigned Academic Supervisor';
+    renderField('Host Employer', placement.company_name || 'Industrial Attachment Centre', col2X, textY, colW);
+    renderField('Workplace Address', placement.address || 'Industrial Placement Station', col2X, textY + 16, colW);
+    renderField('Industry Supervisor', indSup, col2X, textY + 32, colW);
+    renderField('Academic Supervisor', schSup, col2X, textY + 48, colW);
+
+    doc.y = cardY + cardH + 12;
+
+    // 3. Section Title & Counter
+    doc.fillColor(C.slateHeading).fontSize(9.5).font('Helvetica-Bold')
+       .text('CERTIFIED ACTIVITY LOGS & WEEKLY DUTIES', M, doc.y);
+    doc.fillColor(C.slateMuted).fontSize(7.5).font('Helvetica')
+       .text('Chronological record of verified industrial training entries approved for SIWES academic credit.', M, doc.y + 2);
+    doc.y += 14;
+
+    // 4. Activity Logs
     if (student.activity_logs.length === 0) {
-      doc.fontSize(11).text('No certified (endorsed) activity logs found yet. Only verified and endorsed entries are included in the official logbook.');
+      const emptyH = 68;
+      doc.roundedRect(M, doc.y, CW, emptyH, 4).fillAndStroke(C.slateBg, C.border);
+      doc.fillColor(C.emeraldDark).fontSize(9).font('Helvetica-Bold')
+         .text('NO CERTIFIED ENTRIES RECORDED YET', M + 14, doc.y + 16, { width: CW - 28, align: 'center' });
+      doc.fillColor(C.slateMuted).fontSize(8).font('Helvetica')
+         .text('Only daily activities that have been formally signed and endorsed by your Workplace Supervisor will be included in this official certified transcript. Please liaise with your supervisor to review your pending logs.', M + 14, doc.y + 32, { width: CW - 28, align: 'center' });
+      doc.y += emptyH + 16;
     } else {
-      student.activity_logs.forEach((log, i) => {
-        doc.fontSize(13).text(`Entry #${i + 1} - ${new Date(log.log_date).toDateString()}`, { underline: true });
-        doc.fontSize(10)
-           .text(`Workplace Status: ENDORSED`)
-           .text(`Academic Status: ${log.status.toUpperCase()}`)
-           .text(`Description: ${log.description}`)
-           .text(`Skills Acquired: ${log.skills_acquired || 'N/A'}`)
-           .text(`Supervisor Comment: ${log.supervisor_comment || 'None'}`);
-        doc.moveDown();
+      const innerW = CW - 20;
+
+      student.activity_logs.forEach((log, index) => {
+        doc.fontSize(8.5).font('Helvetica');
+        const descH = doc.heightOfString(log.description || 'No description provided.', { width: innerW });
+
+        doc.fontSize(8).font('Helvetica');
+        const skillsText = log.skills_acquired || 'N/A';
+        const skillsH = doc.heightOfString(skillsText, { width: innerW });
+
+        let commentH = 0;
+        if (log.supervisor_comment) {
+          doc.fontSize(8).font('Helvetica-Oblique');
+          commentH = doc.heightOfString(`"${log.supervisor_comment}"`, { width: innerW - 16 });
+        }
+
+        let entryCardH = 24 + 14 + 12 + descH + 12 + skillsH;
+        if (log.supervisor_comment) {
+          entryCardH += 12 + commentH + 14;
+        }
+        entryCardH += 8;
+
+        checkPageSpace(entryCardH + 8);
+
+        const startY = doc.y;
+
+        // Card Container
+        doc.roundedRect(M, startY, CW, entryCardH, 4).fillAndStroke(C.white, C.border);
+
+        // Card Header Bar
+        doc.roundedRect(M, startY, CW, 22, 4).fill(C.slateBg);
+        doc.rect(M, startY + 16, CW, 6).fill(C.slateBg);
+        doc.moveTo(M, startY + 22).lineTo(M + CW, startY + 22).strokeColor(C.border).lineWidth(1).stroke();
+
+        // Entry Pill Badge
+        const pillW = 54;
+        const pillH = 14;
+        doc.roundedRect(M + 8, startY + 4, pillW, pillH, 3).fill(C.emeraldDark);
+        doc.fillColor(C.white).fontSize(7).font('Helvetica-Bold')
+           .text(`ENTRY #${index + 1}`, M + 8, startY + 7.5, { width: pillW, align: 'center' });
+
+        // Date
+        const dateStr = new Date(log.log_date).toLocaleDateString('en-GB', {
+          weekday: 'short',
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric'
+        });
+        doc.fillColor(C.slateHeading).fontSize(8.5).font('Helvetica-Bold')
+           .text(dateStr, M + pillW + 16, startY + 6.5);
+
+        // Status Badges
+        const acadW = 86;
+        const acadX = M + CW - acadW - 8;
+        doc.roundedRect(acadX, startY + 4, acadW, pillH, 3).fill(C.blueBadgeBg);
+        doc.fillColor(C.blueText).fontSize(6.5).font('Helvetica-Bold')
+           .text(`ACADEMIC: ${(log.status || 'APPROVED').toUpperCase()}`, acadX, startY + 7.5, { width: acadW, align: 'center' });
+
+        const workW = 104;
+        const workX = acadX - workW - 6;
+        doc.roundedRect(workX, startY + 4, workW, pillH, 3).fill(C.emeraldBadgeBg);
+        doc.fillColor(C.emeraldText).fontSize(6.5).font('Helvetica-Bold')
+           .text('✓ WORKPLACE ENDORSED', workX, startY + 7.5, { width: workW, align: 'center' });
+
+        // Content
+        let curY = startY + 28;
+
+        doc.fillColor(C.slateMuted).fontSize(7).font('Helvetica-Bold')
+           .text('TASKS & OPERATIONAL ACTIVITIES', M + 10, curY, { width: innerW, characterSpacing: 0.5 });
+        curY += 9;
+        doc.fillColor(C.slateHeading).fontSize(8.5).font('Helvetica')
+           .text(log.description || 'No description provided.', M + 10, curY, { width: innerW, lineGap: 1.5 });
+        curY += descH + 8;
+
+        doc.fillColor(C.slateMuted).fontSize(7).font('Helvetica-Bold')
+           .text('COMPETENCIES & SKILLS ACQUIRED', M + 10, curY, { width: innerW, characterSpacing: 0.5 });
+        curY += 9;
+        doc.fillColor(C.emeraldPrimary).fontSize(8).font('Helvetica-Bold')
+           .text(`• ${skillsText}`, M + 10, curY, { width: innerW });
+        curY += skillsH + 8;
+
+        if (log.supervisor_comment) {
+          const boxH = commentH + 12;
+          doc.roundedRect(M + 10, curY, innerW, boxH, 3).fillAndStroke(C.calloutBg, C.calloutBorder);
+          doc.rect(M + 10, curY, 3, boxH).fill(C.calloutLeft);
+
+          doc.fillColor(C.emeraldText).fontSize(6.5).font('Helvetica-Bold')
+             .text('WORKPLACE SUPERVISOR EVALUATION / REMARKS:', M + 18, curY + 3);
+
+          doc.fillColor(C.emeraldDark).fontSize(8).font('Helvetica-Oblique')
+             .text(`"${log.supervisor_comment}"`, M + 18, curY + 11, { width: innerW - 16 });
+
+          curY += boxH + 6;
+        }
+
+        doc.y = startY + entryCardH + 10;
       });
+    }
+
+    // 5. Dual-Tier Institutional Sign-off Block
+    const signH = 95;
+    checkPageSpace(signH + 10);
+
+    const signBlockY = doc.y;
+    doc.roundedRect(M, signBlockY, CW, signH, 4).fillAndStroke(C.slateBg, C.borderStrong);
+    doc.roundedRect(M, signBlockY, CW, 18, 4).fill(C.slateDark);
+    doc.rect(M, signBlockY + 12, CW, 6).fill(C.slateDark);
+    doc.fillColor(C.white).fontSize(7.5).font('Helvetica-Bold')
+       .text('INSTITUTIONAL & INDUSTRY DUAL-TIER CERTIFICATION SIGN-OFF', M + 10, signBlockY + 5, { width: CW - 20 });
+
+    const halfW = (CW - 24) / 2;
+    const sigCol1X = M + 10;
+    const sigCol2X = M + 14 + halfW;
+    const sigY = signBlockY + 24;
+
+    doc.fillColor(C.slateHeading).fontSize(7.5).font('Helvetica-Bold')
+       .text('INDUSTRY WORKPLACE SUPERVISOR', sigCol1X, sigY);
+    doc.fillColor(C.slateMuted).fontSize(7).font('Helvetica')
+       .text('I hereby certify that the trainee completed the above logged duties.', sigCol1X, sigY + 10, { width: halfW });
+
+    doc.moveTo(sigCol1X, sigY + 42).lineTo(sigCol1X + halfW - 10, sigY + 42).strokeColor(C.borderStrong).lineWidth(1).stroke();
+    doc.fillColor(C.slateMuted).fontSize(6.5).font('Helvetica')
+       .text('Signature & Official Stamp / Date', sigCol1X, sigY + 45);
+
+    doc.fillColor(C.slateHeading).fontSize(7.5).font('Helvetica-Bold')
+       .text('INSTITUTION ACADEMIC SUPERVISOR', sigCol2X, sigY);
+    doc.fillColor(C.slateMuted).fontSize(7).font('Helvetica')
+       .text('I confirm academic review and credit endorsement of this record.', sigCol2X, sigY + 10, { width: halfW });
+
+    doc.moveTo(sigCol2X, sigY + 42).lineTo(sigCol2X + halfW - 10, sigY + 42).strokeColor(C.borderStrong).lineWidth(1).stroke();
+    doc.fillColor(C.slateMuted).fontSize(6.5).font('Helvetica')
+       .text('Signature & Departmental Stamp / Date', sigCol2X, sigY + 45);
+
+    doc.fillColor(C.slateMuted).fontSize(6).font('Helvetica-Oblique')
+       .text('Digital Verification Note: This document has been validated on the SIWES Activity Tracking System. Any unauthorized alteration or falsification renders it null and void under ITF Act Regulations.', M + 10, signBlockY + signH - 18, { width: CW - 20, align: 'center' });
+
+    doc.y = signBlockY + signH + 10;
+
+    // 6. Running Footers on All Pages
+    const range = doc.bufferedPageRange();
+    const footerDate = new Date().toLocaleDateString('en-GB', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    });
+
+    for (let i = range.start; i < range.start + range.count; i++) {
+      doc.switchToPage(i);
+      doc.moveTo(M, PAGE_H - 28).lineTo(M + CW, PAGE_H - 28).strokeColor(C.border).lineWidth(1).stroke();
+
+      doc.fillColor(C.slateMuted).fontSize(6.5).font('Helvetica')
+         .text('SIWES Activity Tracking System • Official Student E-Logbook Record', M, PAGE_H - 22, { width: CW / 2, align: 'left' });
+
+      doc.fillColor(C.slateMuted).fontSize(6.5).font('Helvetica')
+         .text(`Generated on ${footerDate} • Page ${i + 1} of ${range.count}`, M + CW / 2, PAGE_H - 22, { width: CW / 2, align: 'right' });
     }
 
     doc.end();
